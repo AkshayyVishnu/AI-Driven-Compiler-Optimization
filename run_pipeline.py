@@ -21,6 +21,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from src.logger_config import setup_logging
 from src.message_logger import MessageLogger
 from src.pipeline.pipeline import CompilerOptimizationPipeline
+from src.llm.llm_client import make_llm_client
 
 logger = logging.getLogger(__name__)
 
@@ -87,6 +88,11 @@ Examples:
     parser.add_argument("--no-llm",      action="store_true", help="Skip LLM (rule-based only)")
     parser.add_argument("--no-security", action="store_true", help="Skip security audit (Step 4)")
     parser.add_argument(
+        "--llm", choices=["ollama", "gemini"], default="ollama",
+        metavar="BACKEND",
+        help="LLM backend: 'ollama' (Qwen 2.5 Coder, default) or 'gemini' (Google Gemini API)",
+    )
+    parser.add_argument(
         "--show-messages", "-m", action="store_true",
         help="Show live inter-agent messages on stdout + summary table"
     )
@@ -129,24 +135,39 @@ Examples:
         _need_msg_logger = False
 
     logger.info("Initialising pipeline agents …")
-    pipeline = CompilerOptimizationPipeline()
+    llm_client = make_llm_client(args.llm)
+    pipeline = CompilerOptimizationPipeline(llm_client=llm_client)
 
     if args.no_llm:
         for agent in (pipeline.analysis_agent,
                       pipeline.optimization_agent,
                       pipeline.verification_agent,
                       pipeline.security_agent):
-            agent.llm._available = False
+            if agent is not None:
+                agent.llm._available = False
         logger.warning("LLM disabled — rule-based analysis only")
         print(_c("  [LLM] Disabled via --no-llm flag", _YELLOW))
     else:
         llm_status = pipeline.analysis_agent.llm.health_check()
         if llm_status.get("available"):
-            logger.info(f"LLM online: {llm_status.get('model')}")
-            print(_c(f"  [LLM] Qwen 2.5 Coder connected → {llm_status.get('model')}", _GREEN))
+            backend_label = (
+                f"Gemini API ({llm_status.get('model')})"
+                if args.llm == "gemini"
+                else f"Qwen 2.5 Coder ({llm_status.get('model')})"
+            )
+            logger.info(f"LLM online: {backend_label}")
+            print(_c(f"  [LLM] {backend_label} — connected", _GREEN))
         else:
-            logger.warning("Ollama not running — using stub LLM fallback")
-            print(_c("  [LLM] Ollama not running — stub/rule-based mode", _YELLOW))
+            if args.llm == "gemini":
+                logger.warning("Gemini API unavailable — stub/rule-based mode")
+                print(_c(
+                    "  [LLM] Gemini API unavailable "
+                    "(missing google-generativeai package or GEMINI_API_KEY) — stub mode",
+                    _YELLOW,
+                ))
+            else:
+                logger.warning("Ollama not running — using stub LLM fallback")
+                print(_c("  [LLM] Ollama not running — stub/rule-based mode", _YELLOW))
 
     # Attach MessageLogger now that pipeline is built
     if _need_msg_logger:

@@ -4,9 +4,9 @@
 #include <iostream>
 
 int main() {
-    int arr[5];
+    int arr[3];
     
-    for (int i = 0; i <= 5; i++) {  // ERROR: Off-by-one, writes to arr[5]
+    for (int i = 0; i <= 3; i++) {  // ERROR: Off-by-one, writes to arr[5]
         arr[i] = i * 2;
     }
     

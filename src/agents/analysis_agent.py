@@ -210,9 +210,20 @@ class AnalysisAgent(BaseAgent):
         # Division by zero heuristic — strip comments first to avoid false positives
         _src_nc = re.sub(r'//[^\n]*', '', source_code)                       # remove // comments
         _src_nc = re.sub(r'/\*.*?\*/', '', _src_nc, flags=re.DOTALL)         # remove /* */ blocks
-        div_pattern = re.findall(r'/\s*(\w+)', _src_nc)
+        _CPP_KW = frozenset({
+            'int', 'char', 'float', 'double', 'long', 'short', 'unsigned',
+            'bool', 'void', 'return', 'if', 'else', 'for', 'while', 'do',
+            'switch', 'case', 'break', 'continue', 'struct', 'class',
+        })
+        # Only match: something / varname  (not: varname / literal)
+        div_pattern = re.findall(r'\b\w+\s*/\s*(\w+)\b', _src_nc)
+        seen_div = set()
         for var in div_pattern:
-            if re.search(rf'\b{re.escape(var)}\s*=\s*0\b', _src_nc):
+            if var in seen_div or var in _CPP_KW:
+                continue
+            seen_div.add(var)
+            # Only flag if var is assigned 0 as a direct statement
+            if re.search(rf'(?:^|\s){re.escape(var)}\s*=\s*0\s*;', _src_nc, re.MULTILINE):
                 findings.append({
                     "type":        "division_by_zero_risk",
                     "description": f"Variable '{var}' may be 0 when used as divisor.",
@@ -247,14 +258,15 @@ class AnalysisAgent(BaseAgent):
     # ── Helpers ───────────────────────────────────────────────────────────────
 
     def _merge_findings(self, rule: List[Dict], llm: List[Dict]) -> List[Dict]:
-        """Merge rule-based and LLM findings, appending source label."""
+        """Merge rule-based and LLM findings, deduplicating on (type, line) pair."""
         merged = list(rule)
-        seen_types = {f["type"] for f in rule}
+        seen = {(f["type"], f.get("line")) for f in rule}
         for f in llm:
-            ftype = f.get("type", "unknown")
-            if ftype not in seen_types:
+            key = (f.get("type", "unknown"), f.get("line"))
+            if key not in seen:
                 f.setdefault("source", "llm")
                 merged.append(f)
+                seen.add(key)
         return merged
 
     def _build_summary(self, file_path, findings, conclusion) -> str:

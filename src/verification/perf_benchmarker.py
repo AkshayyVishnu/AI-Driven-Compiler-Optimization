@@ -1,8 +1,13 @@
 """
 Performance Benchmarker — Week 7
 
-Compiles original and optimized code with -O0, runs each 5 times,
-and reports average execution time and speedup percentage.
+Compiles original and optimized code with -O0, runs each N times,
+and reports minimum execution time (measured inside the process via
+std::chrono) and speedup percentage.
+
+Timing is injected directly into the C++ source as a harness around
+main() using std::chrono::high_resolution_clock, so process spawn,
+ELF loading, and OS teardown are excluded from the measurement.
 
 Requires g++ on PATH. Falls back gracefully if unavailable.
 """
@@ -11,13 +16,37 @@ import logging
 import os
 import subprocess
 import tempfile
-import time
 from dataclasses import dataclass
 from typing import Optional
 
 logger = logging.getLogger(__name__)
 
-_RUNS = 5  # number of timing runs per binary
+_RUNS = 10   # number of timing runs per binary
+
+# ── Timing harness ─────────────────────────────────────────────────────────────
+# Prepended to source: renames the user's main → __orig_main__ so our
+# wrapper can call it while the linker still finds a symbol named main.
+_TIMING_PREFIX = "#define main __orig_main__\n"
+
+# Appended to source after the original code.
+# Provides a new main() that wraps __orig_main__ with chrono timing and
+# writes elapsed nanoseconds to stderr (never pollutes stdout, so
+# differential testing output comparison is unaffected).
+_TIMING_HARNESS = r"""
+#ifdef __cplusplus
+#include <chrono>
+#include <cstdio>
+int main(int argc, char* argv[]) {
+    auto _t0 = std::chrono::high_resolution_clock::now();
+    int  _r  = __orig_main__(argc, argv);
+    auto _t1 = std::chrono::high_resolution_clock::now();
+    long long _ns = std::chrono::duration_cast<
+        std::chrono::nanoseconds>(_t1 - _t0).count();
+    fprintf(stderr, "__PERF_NS__:%lld\n", _ns);
+    return _r;
+}
+#endif
+"""
 
 
 @dataclass
@@ -33,8 +62,8 @@ class PerfResult:
             return f"Perf benchmark skipped: {self.error}"
         direction = "faster" if self.speedup_pct >= 0 else "slower"
         return (
-            f"Original: {self.original_ms:.2f} ms | "
-            f"Optimized: {self.optimized_ms:.2f} ms | "
+            f"Original: {self.original_ms:.3f} ms | "
+            f"Optimized: {self.optimized_ms:.3f} ms | "
             f"Speedup: {abs(self.speedup_pct):.1f}% {direction}"
         )
 
@@ -42,6 +71,12 @@ class PerfResult:
 class PerfBenchmarker:
     """
     Measures and compares runtime of original vs optimized C++ code.
+
+    Injects a std::chrono timing harness into each source file so that
+    only the code inside main() is timed — process spawn and OS overhead
+    are excluded entirely.  The minimum across _RUNS executions is used
+    as the representative time (noise always adds latency, never removes
+    it, so the minimum is the best approximation of true runtime).
 
     Usage
     -----
@@ -73,13 +108,13 @@ class PerfBenchmarker:
                 with open(path, "w", encoding="utf-8") as f:
                     f.write(src)
 
-            if not self._compile(orig_cpp, orig_bin):
+            if not self._compile_timed(orig_cpp, orig_bin):
                 return PerfResult(available=True, error="Original compilation failed.")
-            if not self._compile(opt_cpp, opt_bin):
+            if not self._compile_timed(opt_cpp, opt_bin):
                 return PerfResult(available=True, error="Optimized compilation failed.")
 
-            orig_ms = self._median_runtime_ms(orig_bin)
-            opt_ms  = self._median_runtime_ms(opt_bin)
+            orig_ms = self._timed_run_ms(orig_bin)
+            opt_ms  = self._timed_run_ms(opt_bin)
 
             if orig_ms > 0:
                 speedup = (orig_ms - opt_ms) / orig_ms * 100.0
@@ -95,35 +130,56 @@ class PerfBenchmarker:
 
     # ── Internals ─────────────────────────────────────────────────────────────
 
-    def _compile(self, src: str, out: str) -> bool:
+    def _compile_timed(self, src_path: str, out_path: str) -> bool:
+        """
+        Wrap source with the timing harness, write it back, then compile.
+        The harness renames main → __orig_main__ and provides a new main()
+        that times the call and prints __PERF_NS__:<ns> to stderr.
+        """
         try:
+            with open(src_path, "r", encoding="utf-8") as f:
+                original = f.read()
+            wrapped = _TIMING_PREFIX + original + _TIMING_HARNESS
+            with open(src_path, "w", encoding="utf-8") as f:
+                f.write(wrapped)
             proc = subprocess.run(
-                [self.compiler, src, "-o", out, "-O0", "-w"],
-                capture_output=True, timeout=self.timeout
+                [self.compiler, src_path, "-o", out_path, "-O0", "-w"],
+                capture_output=True,
+                text=True,
+                timeout=self.timeout,
             )
             return proc.returncode == 0
-        except Exception:
+        except Exception as exc:
+            logger.debug(f"PerfBenchmarker compile error: {exc}")
             return False
 
-    def _median_runtime_ms(self, binary: str) -> float:
+    def _timed_run_ms(self, binary: str) -> float:
+        """
+        Run binary self.runs times, parse __PERF_NS__ from stderr each time,
+        return the minimum in milliseconds.
+
+        Using the minimum (not mean/median) because measurement noise always
+        adds latency — the minimum is the run where the OS interfered least,
+        giving the closest approximation to true execution time.
+        """
         times = []
         for _ in range(self.runs):
             try:
-                t0 = time.perf_counter()
-                subprocess.run(
+                proc = subprocess.run(
                     [binary],
                     capture_output=True,
-                    timeout=self.timeout
+                    text=True,
+                    timeout=self.timeout,
+                    input="",          # immediate EOF for programs using scanf/cin
                 )
-                elapsed = (time.perf_counter() - t0) * 1000
-                times.append(elapsed)
+                for line in proc.stderr.splitlines():
+                    if line.startswith("__PERF_NS__:"):
+                        ns = int(line.split(":")[1])
+                        times.append(ns / 1_000_000)   # nanoseconds → milliseconds
+                        break
             except Exception:
                 pass
-        if not times:
-            return 0.0
-        times.sort()
-        mid = len(times) // 2
-        return times[mid]
+        return min(times) if times else 0.0
 
     def _check_compiler(self) -> bool:
         try:

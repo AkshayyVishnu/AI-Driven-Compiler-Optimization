@@ -28,6 +28,8 @@ class DiffTestResult:
     compile_error_optimized: Optional[str] = None
     runtime_error: Optional[str] = None
     error: Optional[str] = None
+    original_returncode: int = 0
+    optimized_returncode: int = 0
 
 
 class DifferentialTester:
@@ -97,9 +99,9 @@ class DifferentialTester:
                 )
 
             # Run original
-            orig_out, orig_err = self._run(orig_bin)
+            orig_out, orig_err, orig_rc = self._run(orig_bin)
             # Run optimized
-            opt_out, opt_err = self._run(opt_bin)
+            opt_out, opt_err, opt_rc = self._run(opt_bin)
 
             passed = (orig_out == opt_out)
 
@@ -108,6 +110,8 @@ class DifferentialTester:
                 original_output=orig_out,
                 optimized_output=opt_out,
                 runtime_error=(orig_err or opt_err) or None,
+                original_returncode=orig_rc,
+                optimized_returncode=opt_rc,
             )
 
     # ── Internals ─────────────────────────────────────────────────────────────
@@ -131,19 +135,20 @@ class DifferentialTester:
             return f"Compiler '{self.compiler}' not found."
 
     def _run(self, binary_path: str):
-        """Return (stdout, stderr) as strings."""
+        """Return (stdout, stderr, returncode) as strings and int."""
         try:
             proc = subprocess.run(
                 [binary_path],
                 capture_output=True,
                 text=True,
                 timeout=self.timeout,
+                input="",          # provide empty stdin → immediate EOF
             )
-            return proc.stdout.strip(), proc.stderr.strip()
+            return proc.stdout.strip(), proc.stderr.strip(), proc.returncode
         except subprocess.TimeoutExpired:
-            return "", "Execution timed out."
+            return "", "Execution timed out.", -1
         except Exception as exc:
-            return "", str(exc)
+            return "", str(exc), -1
 
     def _check_compiler(self) -> bool:
         try:

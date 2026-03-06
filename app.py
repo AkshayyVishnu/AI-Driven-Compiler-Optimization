@@ -123,11 +123,10 @@ class _QueueMessageLogger:
 # LLM factory
 # ────────────────────────────────────────────────────────────────────────────
 
-def _make_llm(use_llm: bool):
-    from src.llm.llm_client import LLMClient
-    client = LLMClient()
+def _make_llm(use_llm: bool, backend: str = "ollama"):
+    from src.llm.llm_client import make_llm_client
+    client = make_llm_client(backend)
     if not use_llm:
-        # Force stub mode — never queries Ollama
         client._available = False
     return client
 
@@ -250,7 +249,7 @@ def _run_verify_only(sq: StreamQueue, source_code: str, file_path: str, use_llm:
 # ────────────────────────────────────────────────────────────────────────────
 
 def _worker(sq: StreamQueue, source_code: str, mode: str,
-            use_llm: bool, language: str) -> None:
+            use_llm: bool, language: str, backend: str = "ollama") -> None:
     """Runs the requested pipeline mode; pushes all events into sq."""
 
     # Attach a log handler so Python loggers stream to the UI
@@ -338,11 +337,15 @@ def _worker(sq: StreamQueue, source_code: str, mode: str,
 @app.route("/api/health", methods=["GET"])
 def health():
     try:
-        from src.llm.llm_client import LLMClient
-        info = LLMClient().health_check()
+        from src.llm.llm_client import LLMClient, GeminiLLMClient
+        ollama_info = LLMClient().health_check()
     except Exception as exc:
-        info = {"available": False, "error": str(exc)}
-    return jsonify({"status": "ok", "ollama": info})
+        ollama_info = {"available": False, "error": str(exc)}
+    try:
+        gemini_info = GeminiLLMClient().health_check()
+    except Exception as exc:
+        gemini_info = {"available": False, "error": str(exc)}
+    return jsonify({"status": "ok", "ollama": ollama_info, "gemini": gemini_info})
 
 
 @app.route("/api/stream", methods=["POST"])
@@ -352,6 +355,7 @@ def stream_endpoint():
     mode     = body.get("mode", "pipeline")
     use_llm  = bool(body.get("use_llm", True))
     language = body.get("language", "cpp")
+    backend  = body.get("backend", "ollama")
 
     if not code:
         return jsonify({"error": "No code provided"}), 400
@@ -359,7 +363,7 @@ def stream_endpoint():
     sq = StreamQueue()
     threading.Thread(
         target=_worker,
-        args=(sq, code, mode, use_llm, language),
+        args=(sq, code, mode, use_llm, language, backend),
         daemon=True,
     ).start()
 

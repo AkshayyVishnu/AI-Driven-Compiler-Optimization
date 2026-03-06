@@ -1,21 +1,27 @@
 """
 run_agent.py — Run a single agent independently
 ================================================
-Run any one of the three pipeline agents on its own, without the full pipeline.
+Run any one of the four pipeline agents on its own, without the full pipeline.
 
 Commands
 --------
   python run_agent.py analyze  <file.cpp>  [--no-llm] [-v|-q]
   python run_agent.py optimize <file.cpp>  [--no-llm] [-v|-q]
-  python run_agent.py verify   <file.cpp>  --optimized <opt.cpp>  [-v|-q]
+  python run_agent.py verify   <file.cpp>  [--optimized <opt.cpp>]  [-v|-q]
+  python run_agent.py security <file.cpp>  [--optimized <opt.cpp>]  [--no-llm] [-v|-q]
 
 Notes
 -----
 • 'optimize' automatically runs a quick analysis first (needed for context).
 • 'verify'   requires --optimized pointing to the already-optimised file,
-             or it will try to find <basename>_OPT_<basename> in
+             or it will try to find OPT_<basename> in
              MicroBenchmarks/Generated_optimisation/ automatically.
-• For the full 3-agent pipeline  →  run_pipeline.py
+• 'security' scans a single file for vulnerabilities when --optimized is
+             omitted.  When --optimized is given it performs a differential
+             security audit and reports only NEW vulnerabilities introduced
+             by the optimization.  Auto-detection of OPT_* files works the
+             same way as in 'verify'.
+• For the full 4-agent pipeline  →  run_pipeline.py
 • For a focused optimizer-only shortcut  →  run_optimizer.py
 """
 
@@ -42,10 +48,11 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from src.logger_config import setup_logging
 from agent_framework import ContextManager
-from src.llm.llm_client import LLMClient
+from src.llm.llm_client import LLMClient, make_llm_client
 from src.agents.analysis_agent import AnalysisAgent
 from src.agents.optimization_agent import OptimizationAgent
 from src.agents.verification_agent import VerificationAgent
+from src.agents.security_agent import SecurityAgent
 
 # ── Colours ───────────────────────────────────────────────────────────────────
 R       = "\033[0m"
@@ -103,7 +110,7 @@ def cmd_analyze(args):
 
     source = _read_file(file_path)
     context = ContextManager()
-    llm = LLMClient()
+    llm = make_llm_client(getattr(args, "llm", "ollama"))
     agent = AnalysisAgent("analysis_1", context, llm)
 
     if args.no_llm:
@@ -146,7 +153,7 @@ def cmd_optimize(args):
 
     source  = _read_file(file_path)
     context = ContextManager()
-    llm     = LLMClient()
+    llm     = make_llm_client(getattr(args, "llm", "ollama"))
 
     analysis_agent     = AnalysisAgent("analysis_1", context, llm)
     optimization_agent = OptimizationAgent("optimization_1", context, llm)
@@ -219,14 +226,11 @@ def cmd_verify(args):
     else:
         # Try to auto-find OPT_<basename> in Generated_optimisation/
         basename = os.path.basename(orig_path)
-        candidate = os.path.join(
+        candidate = os.path.normpath(os.path.join(
             os.path.dirname(orig_path), "..", "..",
             "MicroBenchmarks", "Generated_optimisation",
             "OPT_" + basename,
-        )
-        candidate = os.path.normpath(
-            os.path.join(os.path.dirname(orig_path), candidate)
-        )
+        ))
         if os.path.isfile(candidate):
             opt_path = candidate
             print(_c(f"  [AUTO] Found optimized file: {opt_path}", DIM))
@@ -247,7 +251,7 @@ def cmd_verify(args):
     optimized = _read_file(opt_path)
 
     context = ContextManager()
-    llm     = LLMClient()
+    llm     = make_llm_client(getattr(args, "llm", "ollama"))
     agent   = VerificationAgent("verification_1", context, llm)
 
     _section("Running Verification Agent  (4 layers)")
@@ -278,14 +282,158 @@ def cmd_verify(args):
     return ver_result
 
 
+# ── Sub-command: security ─────────────────────────────────────────────────────
+
+def cmd_security(args):
+    orig_path = os.path.abspath(args.file)
+    if not os.path.isfile(orig_path):
+        print(_c(f"\n  [ERROR] File not found: {orig_path}", RED))
+        sys.exit(1)
+
+    # ── Locate optimized file (optional) ──────────────────────────────────────
+    differential = False
+    opt_path     = None
+
+    if args.optimized:
+        opt_path     = os.path.abspath(args.optimized)
+        differential = True
+        if not os.path.isfile(opt_path):
+            print(_c(f"\n  [ERROR] Optimized file not found: {opt_path}", RED))
+            sys.exit(1)
+    else:
+        # Try auto-detect OPT_<basename> in Generated_optimisation/
+        basename  = os.path.basename(orig_path)
+        candidate = os.path.normpath(os.path.join(
+            os.path.dirname(orig_path), "..", "..",
+            "MicroBenchmarks", "Generated_optimisation",
+            "OPT_" + basename,
+        ))
+        if os.path.isfile(candidate):
+            opt_path     = candidate
+            differential = True
+            print(_c(f"  [AUTO] Found optimized file: {opt_path}", DIM))
+        else:
+            # Single-file mode — scan the file for vulnerabilities as-is
+            opt_path     = orig_path
+            differential = False
+            print(_c("  [INFO] No optimized file found — scanning single file.", DIM))
+
+    original  = _read_file(orig_path)
+    optimized = _read_file(opt_path)
+
+    context = ContextManager()
+    llm     = make_llm_client(getattr(args, "llm", "ollama"))
+    agent   = SecurityAgent("security_1", context, llm)
+
+    if args.no_llm:
+        agent.llm._available = False
+        print(_c("  [LLM] Disabled via --no-llm", YELLOW))
+
+    mode_label = "Differential Security Audit" if differential else "Security Scan"
+    _section(f"Running Security Agent  — {mode_label}  (4 layers)")
+
+    sec_result = agent.process({
+        "original_code":  original,
+        "optimized_code": optimized,
+        "file_path":      orig_path,
+    })
+
+    status     = sec_result.get("status", "?")
+    risk       = sec_result.get("overall_risk", "?").upper()
+    all_vulns  = sec_result.get("all_vulnerabilities", [])
+    new_vulns  = sec_result.get("new_vulnerabilities", [])
+    sources    = sec_result.get("sources", [])
+
+    status_col = {"PASS": GREEN, "ROLLBACK": RED}.get(status, YELLOW)
+    risk_col   = {
+        "CRITICAL": RED, "HIGH": RED,
+        "MEDIUM": YELLOW, "LOW": GREEN, "NONE": GREEN,
+    }.get(risk, DIM)
+
+    _banner("SECURITY RESULT")
+    print(f"\n  File          : {_c(orig_path, BOLD)}")
+    if differential:
+        print(f"  Optimized     : {_c(opt_path, BOLD)}")
+    print(f"\n  Status        : {_c(status, status_col + BOLD)}")
+    print(f"  Overall Risk  : {_c(risk, risk_col + BOLD)}")
+    print(f"  Total findings: {_c(str(len(all_vulns)), YELLOW + BOLD)}")
+    if differential:
+        new_col = RED if new_vulns else GREEN
+        print(f"  New (by opt.) : {_c(str(len(new_vulns)), new_col + BOLD)}")
+    print(f"  Scan sources  : {', '.join(sources) or 'none'}")
+
+    # ── All findings ──────────────────────────────────────────────────────────
+    sev_col = {"high": RED, "medium": YELLOW, "low": GREEN}
+    if all_vulns:
+        title = "New vulnerabilities" if differential else "Vulnerabilities found"
+        display = new_vulns if differential else all_vulns
+        if display:
+            print(f"\n  {BOLD}{title}:{R}")
+            for i, v in enumerate(display, 1):
+                sev  = v.get("severity", "?")
+                col  = sev_col.get(sev, DIM)
+                ln   = f"  [line {v['line']}]" if v.get("line") else ""
+                cwe  = f"  {v['cwe_id']}" if v.get("cwe_id") else ""
+                src  = f"  ({v.get('source', '?')})" if not differential else ""
+                print(f"  {DIM}{i}.{R} {col}[{sev.upper()}]{ln}{cwe}{R}{src}"
+                      f"  {v.get('type', '?')}  —  {v.get('description', '')}")
+                rec = v.get("recommendation", "")
+                if rec:
+                    print(f"       {DIM}→ {rec}{R}")
+        elif differential:
+            print(f"\n  {GREEN}No new vulnerabilities introduced by the optimization.{R}")
+
+        # In single-file mode, always show all findings
+        if not differential and all_vulns:
+            print(f"\n  {BOLD}All findings:{R}")
+            for i, v in enumerate(all_vulns, 1):
+                sev  = v.get("severity", "?")
+                col  = sev_col.get(sev, DIM)
+                ln   = f"  [line {v['line']}]" if v.get("line") else ""
+                cwe  = f"  {v['cwe_id']}" if v.get("cwe_id") else ""
+                src  = f"  ({v.get('source', '?')})"
+                print(f"  {DIM}{i}.{R} {col}[{sev.upper()}]{ln}{cwe}{R}{src}"
+                      f"  {v.get('type', '?')}  —  {v.get('description', '')}")
+                rec = v.get("recommendation", "")
+                if rec:
+                    print(f"       {DIM}→ {rec}{R}")
+    else:
+        print(f"\n  {GREEN}No vulnerabilities found.{R}")
+
+    # ── Rollback notice ───────────────────────────────────────────────────────
+    if status == "ROLLBACK":
+        triggers = sec_result.get("rollback_triggers", [])
+        print(_c(
+            f"\n  ⚠  ROLLBACK triggered — {len(triggers)} new HIGH-severity "
+            "vulnerability(ies) introduced by the optimization.",
+            RED,
+        ))
+
+    # ── Heuristic scores (verbose only) ───────────────────────────────────────
+    scores = sec_result.get("heuristic_scores", {})
+    if scores and getattr(args, "verbose", False):
+        print(f"\n  {DIM}Heuristic scores:{R}")
+        for signal, score in scores.items():
+            bar = "█" * int(score * 20)
+            print(f"    {signal:<30} {score:.2f}  {DIM}{bar}{R}")
+
+    print()
+    return sec_result
+
+
 # ── Argument parser ───────────────────────────────────────────────────────────
 
 def _add_common_flags(p, include_no_llm=True):
-    """Add --verbose / --quiet (and optionally --no-llm) to a sub-parser."""
+    """Add --verbose / --quiet / --llm (and optionally --no-llm) to a sub-parser."""
     p.add_argument("--verbose", "-v", action="store_true", help="DEBUG logging")
     p.add_argument("--quiet",   "-q", action="store_true", help="WARNING-only logging")
     if include_no_llm:
         p.add_argument("--no-llm", action="store_true", help="Skip LLM (rule-based only)")
+        p.add_argument(
+            "--llm", choices=["ollama", "gemini"], default="ollama",
+            metavar="BACKEND",
+            help="LLM backend: 'ollama' (Qwen, default) or 'gemini' (Google Gemini API)",
+        )
 
 
 def build_parser():
@@ -299,6 +447,9 @@ Examples:
   python run_agent.py optimize MicroBenchmarks/Testcases/TC01_uninit_arithmetic.cpp --no-llm
   python run_agent.py verify   MicroBenchmarks/Testcases/TC01_uninit_arithmetic.cpp \\
         --optimized MicroBenchmarks/Generated_optimisation/OPT_TC01_uninit_arithmetic.cpp
+  python run_agent.py security MicroBenchmarks/Testcases/TC48_format_string.cpp
+  python run_agent.py security MicroBenchmarks/Testcases/TC48_format_string.cpp \\
+        --optimized MicroBenchmarks/Generated_optimisation/OPT_TC48_format_string.cpp
 
 Full pipeline  →  python run_pipeline.py <file>
 Optimizer only →  python run_optimizer.py <file>
@@ -330,6 +481,21 @@ Optimizer only →  python run_optimizer.py <file>
     )
     _add_common_flags(p_verify, include_no_llm=False)
 
+    # --- security ---
+    p_security = sub.add_parser(
+        "security",
+        help="Run only the Security Agent (scan a file, or diff original vs optimized)",
+    )
+    p_security.add_argument("file", help="C/C++ source file to scan")
+    p_security.add_argument(
+        "--optimized", metavar="OPT_FILE",
+        help=(
+            "Optimized file to compare against (auto-detected if omitted). "
+            "When omitted the single file is scanned for vulnerabilities as-is."
+        ),
+    )
+    _add_common_flags(p_security)
+
     return parser
 
 
@@ -359,6 +525,7 @@ def main():
         "analyze":  cmd_analyze,
         "optimize": cmd_optimize,
         "verify":   cmd_verify,
+        "security": cmd_security,
     }
     dispatch[args.command](args)
 

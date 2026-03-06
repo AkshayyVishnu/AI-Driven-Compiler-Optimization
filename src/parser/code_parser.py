@@ -147,6 +147,12 @@ class CodeParser:
 
     # ── Helpers ───────────────────────────────────────────────────────────
 
+    _CPP_KEYWORDS = frozenset({
+        'if', 'else', 'for', 'while', 'do', 'switch', 'case',
+        'return', 'break', 'continue', 'goto', 'try', 'catch',
+        'namespace', 'class', 'struct', 'enum', 'template', 'typedef',
+    })
+
     def _extract_functions(self, src: str, lines: List[str]) -> List[FunctionInfo]:
         funcs = []
         for m in self._RE_FUNC_DECL.finditer(src):
@@ -160,6 +166,9 @@ class CodeParser:
             body = src[body_start:body_start + 500]  # first 500 chars
             # skip obvious non-function matches
             if ret_type.startswith("//") or ret_type.startswith("*"):
+                continue
+            # skip control-flow keywords mistaken for function names
+            if fname in self._CPP_KEYWORDS or ret_type in self._CPP_KEYWORDS:
                 continue
             funcs.append(FunctionInfo(
                 name=fname,

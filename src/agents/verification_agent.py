@@ -134,6 +134,7 @@ class VerificationAgent(BaseAgent):
             not diff_result.passed
             and not diff_result.skipped                    # was not a skip
             and not diff_result.compile_error_original     # original wasn't already broken
+            and diff_result.original_returncode == 0       # original ran cleanly (no UB/crash)
         )
         if real_test_failure or optimized_compile_failed:
             logger.warning("Differential test FAILED — triggering rollback")

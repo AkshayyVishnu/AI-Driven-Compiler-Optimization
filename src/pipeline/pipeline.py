@@ -368,22 +368,30 @@ class CompilerOptimizationPipeline:
             },
         )
 
-        try:
-            sec_result = self.security_agent.process({
-                "original_code":  source_code,
-                "optimized_code": final_code,
-                "file_path":      file_path,
-            })
-        except Exception as exc:
-            logger.error(f"Security audit failed: {exc}")
+        if self.security_agent is None:
+            logger.info("Step 4/4: Security — skipped (no security agent)")
             sec_result = {
-                "all_vulnerabilities": [],
-                "new_vulnerabilities": [],
-                "overall_risk": "unknown",
-                "status": "PASS",
-                "summary": f"Security audit failed: {exc}",
-                "sources": [],
+                "all_vulnerabilities": [], "new_vulnerabilities": [],
+                "overall_risk": "unknown", "status": "PASS",
+                "summary": "Security audit skipped.", "sources": [],
             }
+        else:
+            try:
+                sec_result = self.security_agent.process({
+                    "original_code":  source_code,
+                    "optimized_code": final_code,
+                    "file_path":      file_path,
+                })
+            except Exception as exc:
+                logger.error(f"Security audit failed: {exc}")
+                sec_result = {
+                    "all_vulnerabilities": [],
+                    "new_vulnerabilities": [],
+                    "overall_risk": "unknown",
+                    "status": "PASS",
+                    "summary": f"Security audit failed: {exc}",
+                    "sources": [],
+                }
 
         self._route(
             sender_id="security_1",

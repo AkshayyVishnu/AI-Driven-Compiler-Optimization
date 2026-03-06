@@ -8,6 +8,7 @@ Gracefully degrades if z3-solver is not installed.
 Install with: pip install z3-solver
 """
 
+import ast
 import logging
 import re
 from dataclasses import dataclass
@@ -64,6 +65,28 @@ class Z3Verifier:
 
         return self._check_equivalence(orig_expr, opt_expr)
 
+    # ── Safe expression evaluator ─────────────────────────────────────────────
+
+    @staticmethod
+    def _validate_ast(node):
+        """Raise ValueError if the AST node contains anything beyond simple arithmetic."""
+        allowed = (
+            ast.BinOp, ast.UnaryOp, ast.Constant, ast.Name,
+            ast.Add, ast.Sub, ast.Mult, ast.Div, ast.Mod,
+            ast.USub, ast.UAdd, ast.Expression,
+        )
+        if not isinstance(node, allowed):
+            raise ValueError(f"Unsafe AST node: {type(node).__name__}")
+        for child in ast.iter_child_nodes(node):
+            Z3Verifier._validate_ast(child)
+
+    @staticmethod
+    def _safe_eval(expr: str, ctx: dict):
+        """Evaluate a simple arithmetic expression safely using AST validation."""
+        tree = ast.parse(expr, mode='eval')
+        Z3Verifier._validate_ast(tree.body)
+        return eval(compile(tree, '<z3expr>', 'eval'), {"__builtins__": {}}, ctx)
+
     # ── Internals ─────────────────────────────────────────────────────────────
 
     def _check_equivalence(self, expr1: str, expr2: str) -> Z3Result:
@@ -82,8 +105,15 @@ class Z3Verifier:
                 ctx[v] = z3.Int(v)
 
             # Safely evaluate both expressions in the Z3 context
-            e1 = eval(expr1, {"__builtins__": {}}, ctx)  # noqa: S307
-            e2 = eval(expr2, {"__builtins__": {}}, ctx)  # noqa: S307
+            try:
+                e1 = self._safe_eval(expr1, ctx)
+                e2 = self._safe_eval(expr2, ctx)
+            except ValueError as ve:
+                logger.warning(f"Z3: unsafe expression rejected: {ve}")
+                return Z3Result(
+                    status="UNKNOWN",
+                    explanation=f"Expression contains unsafe constructs: {ve}",
+                )
 
             # Check: is there any assignment where they differ?
             solver.add(e1 != e2)

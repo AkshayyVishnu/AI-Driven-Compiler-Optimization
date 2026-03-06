@@ -1,15 +1,30 @@
 """
 LLM Client for AI-Driven Compiler Optimization System
 
-Connects to Qwen 2.5 Coder 7B via Ollama's HTTP API.
-Falls back to a stub response when Ollama is not running, so the rest
-of the system can always be tested/used offline.
+Two backends are provided:
+  • OllamaLLMClient (default, class alias LLMClient)
+      Connects to Qwen 2.5 Coder 7B via Ollama's HTTP API.
+      Falls back to a stub response when Ollama is not running so the rest
+      of the system can always be tested/used offline.
+  • GeminiLLMClient
+      Uses the Google Gemini API (requires `pip install google-generativeai` and
+      GEMINI_API_KEY set in the environment).
+
+Use make_llm_client(backend) to get the right instance.
 """
 
 import json
 import logging
+import os
 import time
 from typing import Optional, Dict, Any
+
+# Load .env from project root (silently skipped if python-dotenv not installed)
+try:
+    from dotenv import load_dotenv  # type: ignore
+    load_dotenv(os.path.join(os.path.dirname(__file__), "..", "..", ".env"))
+except ImportError:
+    pass
 
 logger = logging.getLogger(__name__)
 
@@ -126,6 +141,7 @@ class LLMClient:
             return False
 
     # ── Stub (offline / fallback) ─────────────────────────────────────────────
+    # (shared by both OllamaLLMClient and ClaudeLLMClient via inheritance)
 
     def _stub_response(self, prompt: str) -> str:
         """
@@ -154,3 +170,118 @@ class LLMClient:
             "confidence": 0.5,
         }
         return "```json\n" + json.dumps(stub, indent=2) + "\n```"
+
+
+# ── Gemini API backend ────────────────────────────────────────────────────────
+
+class GeminiLLMClient(LLMClient):
+    """
+    LLM backend that uses the Google Gemini API.
+
+    Requirements
+    ------------
+    • pip install google-generativeai
+    • GEMINI_API_KEY environment variable set
+
+    Falls back to the same stub response as LLMClient when the SDK is
+    unavailable or the API key is missing.
+    """
+
+    DEFAULT_MODEL = "gemini-1.5-flash"
+
+    def __init__(self, model: str = DEFAULT_MODEL):
+        # Do NOT call super().__init__() — we don't need Ollama at all.
+        self.model      = model
+        self._requests  = None   # unused; kept for _stub_response compat
+        self._genai     = None   # google.generativeai module reference
+        self._available = self._check_gemini()
+
+    # ── Public API ────────────────────────────────────────────────────────────
+
+    def generate(
+        self,
+        prompt: str,
+        system_prompt: str = "",
+        max_tokens: int = 2048,
+        temperature: float = 0.1,
+    ) -> str:
+        if not self._available:
+            logger.warning("Gemini API not available – returning stub response")
+            return self._stub_response(prompt)
+        try:
+            sys_inst = system_prompt or (
+                "You are an expert C/C++ compiler optimisation agent. "
+                "Respond only with structured JSON as instructed."
+            )
+            gemini_model = self._genai.GenerativeModel(
+                model_name=self.model,
+                system_instruction=sys_inst,
+            )
+            gen_cfg = self._genai.types.GenerationConfig(
+                temperature=temperature,
+                max_output_tokens=max_tokens,
+            )
+            response = gemini_model.generate_content(prompt, generation_config=gen_cfg)
+            return response.text
+        except Exception as exc:
+            logger.warning(f"Gemini API call failed: {exc}")
+            return self._stub_response(prompt)
+
+    def is_available(self) -> bool:
+        return self._available
+
+    def health_check(self) -> Dict[str, Any]:
+        available = self._check_gemini()
+        self._available = available
+        return {
+            "available": available,
+            "model":     self.model,
+            "backend":   "gemini",
+        }
+
+    # ── Internals ─────────────────────────────────────────────────────────────
+
+    def _check_gemini(self) -> bool:
+        try:
+            import google.generativeai as genai  # type: ignore
+            api_key = os.environ.get("GEMINI_API_KEY", "")
+            if not api_key:
+                logger.warning(
+                    "GEMINI_API_KEY not set — Gemini backend unavailable."
+                )
+                return False
+            genai.configure(api_key=api_key)
+            self._genai = genai
+            return True
+        except ImportError:
+            logger.warning(
+                "'google-generativeai' package not installed — Gemini backend unavailable. "
+                "Run: pip install google-generativeai"
+            )
+            return False
+        except Exception as exc:
+            logger.warning(f"Gemini API init failed: {exc}")
+            return False
+
+
+# ── Backend factory ───────────────────────────────────────────────────────────
+
+def make_llm_client(backend: str = "ollama") -> LLMClient:
+    """
+    Return the appropriate LLM client for the requested backend.
+
+    Parameters
+    ----------
+    backend : str
+        "ollama"  — Qwen 2.5 Coder 7B via Ollama (default, offline-capable)
+        "gemini"  — Google Gemini API (requires GEMINI_API_KEY)
+
+    Returns
+    -------
+    LLMClient or GeminiLLMClient instance
+    """
+    if backend == "gemini":
+        logger.info("LLM backend: Google Gemini API (%s)", GeminiLLMClient.DEFAULT_MODEL)
+        return GeminiLLMClient()
+    logger.info("LLM backend: Ollama / Qwen 2.5 Coder (%s)", DEFAULT_MODEL)
+    return LLMClient()
