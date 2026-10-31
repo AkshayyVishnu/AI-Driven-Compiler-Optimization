@@ -1,0 +1,44 @@
+{
+  "tc": "TC27",
+  "config": "rule_basic",
+  "expected": [
+    "int_arith"
+  ],
+  "headline": true,
+  "supported": true,
+  "nondeterministic": false,
+  "detected": {
+    "int_arith": false
+  },
+  "n_findings": 0,
+  "detect_s": 0.016,
+  "pipeline_status": "success",
+  "pipeline_s": 1.965,
+  "ver_status": "PASS",
+  "sec_status": "PASS",
+  "diff_passed": true,
+  "transformations": [],
+  "stage_timings": {
+    "analysis": {
+      "parse_s": 0.0002,
+      "rule_s": 0.0012,
+      "llm_s": 0.0
+    },
+    "optimization": {
+      "rule_s": 0.0009,
+      "llm_s": 0.0
+    },
+    "verification": {
+      "parallel_checks_s": 1.9619,
+      "llm_s": 0.0
+    },
+    "security": {
+      "total_s": 0.0024
+    }
+  },
+  "llm_fallback": false,
+  "code_changed": false,
+  "corrected_detector": null,
+  "output_matches_sol": false,
+  "fp_on_sol": false
+}

@@ -1,5 +1,5 @@
 """
-AI-Driven Compiler Optimization System
+DeepCompile
 Source package
 """
 

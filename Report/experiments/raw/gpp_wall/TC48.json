@@ -1,0 +1,15 @@
+{
+  "tc": "TC48",
+  "config": "gpp_wall",
+  "expected": [
+    "format_string"
+  ],
+  "headline": true,
+  "supported": true,
+  "nondeterministic": false,
+  "detected": {
+    "format_string": false
+  },
+  "n_findings": 0,
+  "ver_status": "n/a"
+}

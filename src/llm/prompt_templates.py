@@ -1,5 +1,5 @@
 """
-Prompt Templates for AI-Driven Compiler Optimization System
+Prompt Templates for DeepCompile
 
 Each template provides:
   - A system prompt (role description)
@@ -63,9 +63,11 @@ class OptimizationPromptTemplate:
     """Template for the Optimization Agent."""
 
     SYSTEM = (
-        "You are an expert C/C++ code optimization agent. "
-        "Given source code and an analysis report, you produce corrected and optimized code. "
-        "Always respond with a single JSON object that follows the CoT schema exactly."
+        "You are an expert C/C++ compiler optimization agent. "
+        "Given source code and an analysis report, produce a fully corrected and "
+        "performance-optimized version of the code. "
+        "Apply ALL applicable optimizations from the checklist provided. "
+        "Always respond with a single JSON object — no text outside the JSON block."
     )
 
     @staticmethod
@@ -79,22 +81,35 @@ class OptimizationPromptTemplate:
                 + (f" (line {f['line']})" if f.get('line') else "")
             )
         if not findings_text:
-            findings_text = "\n  - No specific findings from analysis agent."
+            findings_text = "\n  - No specific findings — focus on performance optimizations."
 
         prompt = (
             f"Optimize and fix the following C/C++ code.\n\n"
-            f"Analysis findings:{findings_text}\n\n"
-            f"Original code:\n```cpp\n{source_code}\n```\n\n"
+            f"## Reported Issues to Fix\n{findings_text}\n\n"
+            f"## Optimization Checklist (apply ALL that are applicable)\n"
+            "  1. Bug fixes: off-by-one loops, uninitialized variables, type mismatches\n"
+            "  2. Memory safety: add free() for every malloc(), fix buffer overflows\n"
+            "  3. Strength reduction: replace x*2/x*4 with x<<1/x<<2; x/2 with x>>1\n"
+            "  4. Loop optimizations: hoist invariant strlen/sizeof calls out of loops\n"
+            "  5. Remove dead code: statements after return, empty if/else blocks\n"
+            "  6. Prefer pre-increment (++i) over post-increment (i++) in loops\n"
+            "  7. Add const to variables/pointers that are never modified\n"
+            "  8. Replace repeated identical sub-expressions with a named variable\n\n"
+            f"## Original Code\n```cpp\n{source_code}\n```\n\n"
+            "## Instructions\n"
+            "- Return the COMPLETE optimized file, not a diff or snippet.\n"
+            "- Do not change program semantics or observable output (except fixing bugs).\n"
+            "- Each entry in 'findings' must describe exactly one transformation applied.\n\n"
             "Respond ONLY with a JSON object:\n"
             "```json\n"
             "{\n"
             '  "reasoning_steps": ["<step>", ...],\n'
             '  "findings": [\n'
-            '    {"type": "<transformation>", "description": "<what changed and why>", '
+            '    {"type": "<transformation_type>", "description": "<what changed and why>", '
             '"line": <line_no_or_null>, "severity": "info"}\n'
             "  ],\n"
-            '  "optimized_code": "<full corrected C++ code as a string>",\n'
-            '  "conclusion": "<summary of changes>",\n'
+            '  "optimized_code": "<full corrected C++ source code>",\n'
+            '  "conclusion": "<one-sentence summary of all changes made>",\n'
             '  "confidence": <0.0-1.0>\n'
             "}\n"
             "```"

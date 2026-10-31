@@ -1,0 +1,47 @@
+{
+  "tc": "TC48",
+  "config": "rule_orch",
+  "expected": [
+    "format_string"
+  ],
+  "headline": true,
+  "supported": true,
+  "nondeterministic": false,
+  "detected": {
+    "format_string": true
+  },
+  "n_findings": 2,
+  "detect_s": 0.018,
+  "workflow_status": "PASS",
+  "iterations": 0,
+  "stop_reason": "initial_pass",
+  "pipeline_status": "success",
+  "pipeline_s": 1.616,
+  "ver_status": "PASS",
+  "sec_status": "PASS",
+  "diff_passed": true,
+  "transformations": [],
+  "stage_timings": {
+    "analysis": {
+      "parse_s": 0.0004,
+      "rule_s": 0.0016,
+      "llm_s": 0.0
+    },
+    "optimization": {
+      "rule_s": 0.0011,
+      "llm_s": 0.0
+    },
+    "verification": {
+      "parallel_checks_s": 1.5195,
+      "llm_s": 0.0
+    },
+    "security": {
+      "total_s": 0.0021
+    }
+  },
+  "llm_fallback": false,
+  "code_changed": false,
+  "corrected_detector": false,
+  "output_matches_sol": false,
+  "fp_on_sol": false
+}

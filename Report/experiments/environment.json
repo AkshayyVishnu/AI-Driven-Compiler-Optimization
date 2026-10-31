@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-31",
+  "os": "Windows-11-10.0.26200-SP0",
+  "cpu": "Intel64 Family 6 Model 140 Stepping 2, GenuineIntel",
+  "python": "3.13.7",
+  "g++": "g++ (MinGW.org GCC-6.3.0-1) 6.3.0",
+  "gemini_model_default": "gemini-2.5-flash",
+  "ollama": "not evaluated (user decision); supported via src/llm/llm_client.py",
+  "cppcheck": "not installed",
+  "z3": "not installed (verification layer reports SKIPPED/UNKNOWN)",
+  "clang": "not installed (no independent static-analysis oracle beyond g++ -Wall -Wextra)",
+  "perf_harness_changes": [
+    "added #undef main before the timing wrapper (previously never linked)",
+    "overloaded shim supports int main(), int main(void), int main(int,char**)",
+    "timer moved to a second translation unit using QueryPerformanceCounter on Windows (MinGW GCC 6 std::chrono ticks ~15 ms: 1936/2000 zero readings in a probe)"
+  ],
+  "case_timeout_s": 300,
+  "timeout_explanation": "TC37 is an infinite loop: verification runs diff-test (10 s) plus the perf benchmark (10 runs x 15 s timeout), exceeding the 300 s case limit.",
+  "stdin": "empty for every executed program"
+}

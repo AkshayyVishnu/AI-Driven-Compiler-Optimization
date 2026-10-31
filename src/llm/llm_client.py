@@ -1,5 +1,5 @@
 """
-LLM Client for AI-Driven Compiler Optimization System
+LLM Client for DeepCompile
 
 Two backends are provided:
   • OllamaLLMClient (default, class alias LLMClient)
@@ -166,6 +166,7 @@ class LLMClient:
                 "Step 3: " + hint,
             ],
             "findings": [],
+            "verdict": "UNCERTAIN",
             "conclusion": hint,
             "confidence": 0.5,
         }
@@ -176,24 +177,24 @@ class LLMClient:
 
 class GeminiLLMClient(LLMClient):
     """
-    LLM backend that uses the Google Gemini API.
+    LLM backend that uses the Google Gemini API (google-genai SDK).
 
     Requirements
     ------------
-    • pip install google-generativeai
+    • pip install google-genai
     • GEMINI_API_KEY environment variable set
 
     Falls back to the same stub response as LLMClient when the SDK is
     unavailable or the API key is missing.
     """
 
-    DEFAULT_MODEL = "gemini-1.5-flash"
+    DEFAULT_MODEL = "gemini-2.5-flash"
 
     def __init__(self, model: str = DEFAULT_MODEL):
         # Do NOT call super().__init__() — we don't need Ollama at all.
         self.model      = model
         self._requests  = None   # unused; kept for _stub_response compat
-        self._genai     = None   # google.generativeai module reference
+        self._client    = None   # google.genai.Client instance
         self._available = self._check_gemini()
 
     # ── Public API ────────────────────────────────────────────────────────────
@@ -209,19 +210,21 @@ class GeminiLLMClient(LLMClient):
             logger.warning("Gemini API not available – returning stub response")
             return self._stub_response(prompt)
         try:
+            from google.genai import types as genai_types  # type: ignore
+
             sys_inst = system_prompt or (
                 "You are an expert C/C++ compiler optimisation agent. "
                 "Respond only with structured JSON as instructed."
             )
-            gemini_model = self._genai.GenerativeModel(
-                model_name=self.model,
-                system_instruction=sys_inst,
+            response = self._client.models.generate_content(
+                model=self.model,
+                contents=prompt,
+                config=genai_types.GenerateContentConfig(
+                    system_instruction=sys_inst,
+                    temperature=temperature,
+                    max_output_tokens=max_tokens,
+                ),
             )
-            gen_cfg = self._genai.types.GenerationConfig(
-                temperature=temperature,
-                max_output_tokens=max_tokens,
-            )
-            response = gemini_model.generate_content(prompt, generation_config=gen_cfg)
             return response.text
         except Exception as exc:
             logger.warning(f"Gemini API call failed: {exc}")
@@ -243,20 +246,17 @@ class GeminiLLMClient(LLMClient):
 
     def _check_gemini(self) -> bool:
         try:
-            import google.generativeai as genai  # type: ignore
+            from google import genai  # type: ignore
             api_key = os.environ.get("GEMINI_API_KEY", "")
             if not api_key:
-                logger.warning(
-                    "GEMINI_API_KEY not set — Gemini backend unavailable."
-                )
+                logger.warning("GEMINI_API_KEY not set — Gemini backend unavailable.")
                 return False
-            genai.configure(api_key=api_key)
-            self._genai = genai
+            self._client = genai.Client(api_key=api_key)
             return True
         except ImportError:
             logger.warning(
-                "'google-generativeai' package not installed — Gemini backend unavailable. "
-                "Run: pip install google-generativeai"
+                "'google-genai' package not installed — Gemini backend unavailable. "
+                "Run: pip install google-genai"
             )
             return False
         except Exception as exc:

@@ -1,5 +1,5 @@
 """
-run_pipeline.py — CLI Entry Point for AI Compiler Optimization System
+run_pipeline.py — CLI Entry Point for DeepCompile
 
 Usage:
     python run_pipeline.py <path/to/file.cpp>
@@ -22,6 +22,12 @@ from src.logger_config import setup_logging
 from src.message_logger import MessageLogger
 from src.pipeline.pipeline import CompilerOptimizationPipeline
 from src.llm.llm_client import make_llm_client
+from src.reporting.exporters import (
+    export_html_report,
+    export_markdown_report,
+    render_terminal_report,
+)
+from src.reporting.report_contract import build_explainability_report
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +72,7 @@ def main():
     _enable_ansi()
 
     parser = argparse.ArgumentParser(
-        description="AI-Driven Compiler Optimization System",
+        description="DeepCompile",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Logging levels (default: INFO — shows every step):
@@ -101,6 +107,33 @@ Examples:
         default=None,
         help="Save all inter-agent messages as JSON to FILE (e.g. logs/messages.json)"
     )
+    parser.add_argument(
+        "--basic-pipeline",
+        action="store_true",
+        help="Run the original 4-stage pipeline without orchestration/refinement",
+    )
+    parser.add_argument(
+        "--max-cycles",
+        type=int,
+        default=3,
+        help="Maximum refinement cycles for orchestrated runs (default: 3)",
+    )
+    parser.add_argument(
+        "--low-conf-threshold",
+        type=float,
+        default=0.8,
+        help="Confidence threshold below which refinement is attempted (default: 0.8)",
+    )
+    parser.add_argument(
+        "--export-md",
+        metavar="FILE",
+        help="Write the explainability report to a Markdown file",
+    )
+    parser.add_argument(
+        "--export-html",
+        metavar="FILE",
+        help="Write the explainability report to an HTML file",
+    )
     args = parser.parse_args()
 
     # ── Logging setup ──────────────────────────────────────────────────────────
@@ -115,7 +148,7 @@ Examples:
 
     # ── Header ─────────────────────────────────────────────────────────────────
     print()
-    _banner("AI-DRIVEN COMPILER OPTIMIZATION SYSTEM")
+    _banner("DEEPCOMPILE")
     file_path = os.path.abspath(args.file)
     print(f"\n  Target : {_c(file_path, _BOLD)}")
     print(f"  Log    : {_c(log_path, _DIM)}")
@@ -137,6 +170,7 @@ Examples:
     logger.info("Initialising pipeline agents …")
     llm_client = make_llm_client(args.llm)
     pipeline = CompilerOptimizationPipeline(llm_client=llm_client)
+    orchestration = None
 
     if args.no_llm:
         for agent in (pipeline.analysis_agent,
@@ -189,7 +223,26 @@ Examples:
     total_steps = 3 if args.no_security else 4
     _step(1, total_steps, "Analysis Agent   — detecting bugs & inefficiencies")
 
-    result = pipeline.run(file_path)
+    if args.basic_pipeline or args.no_security:
+        result = pipeline.run(file_path)
+    else:
+        orchestration = pipeline.run_orchestrated(
+            file_path,
+            max_cycles=args.max_cycles,
+            low_conf_threshold=args.low_conf_threshold,
+        )
+        payload = orchestration.get("pipeline_result", {})
+        from src.pipeline.pipeline import PipelineResult
+
+        result = PipelineResult(
+            file_path=payload.get("file_path", file_path),
+            status=payload.get("status", "failed"),
+            analysis_report=payload.get("analysis_report", {}),
+            optimization_report=payload.get("optimization_report", {}),
+            verification_report=payload.get("verification_report", {}),
+            security_report=payload.get("security_report", {}),
+            error=payload.get("error"),
+        )
 
     if msg_logger:
         msg_logger.detach()
@@ -212,8 +265,18 @@ Examples:
     print()
     _banner("PIPELINE RESULT")
     print(result.summary())
+    explainability = build_explainability_report(file_path, result, orchestration)
+    print()
+    print(render_terminal_report(explainability))
     print()
     print(_c(f"  Final Status : {result.status.upper()}", status_colour + _BOLD))
+    if orchestration:
+        print(_c(
+            f"  Workflow     : {orchestration.get('workflow_status', 'UNKNOWN')}"
+            f" | Iterations: {orchestration.get('iteration_count', 0)}"
+            f" | Stop: {orchestration.get('stop_reason', '') or 'n/a'}",
+            _CYAN,
+        ))
 
     if result.status == "success":
         out = result.optimization_report.get("output_file", "")
@@ -232,6 +295,16 @@ Examples:
         )
         print(_c(f"\n  Security Risk : {risk} | New Vulns: {n_new} | "
                  f"Audit: {sec_st}", risk_colour))
+
+    if args.export_md:
+        with open(args.export_md, "w", encoding="utf-8") as fh:
+            fh.write(export_markdown_report(explainability))
+        print(_c(f"\n  Markdown report written to:\n    {args.export_md}", _GREEN))
+
+    if args.export_html:
+        with open(args.export_html, "w", encoding="utf-8") as fh:
+            fh.write(export_html_report(explainability))
+        print(_c(f"\n  HTML report written to:\n    {args.export_html}", _GREEN))
 
     print(f"\n  Full log: {_c(log_path, _DIM)}\n")
     logger.info("run_pipeline.py finished.")

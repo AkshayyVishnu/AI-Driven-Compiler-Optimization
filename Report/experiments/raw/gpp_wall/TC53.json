@@ -1,0 +1,15 @@
+{
+  "tc": "TC53",
+  "config": "gpp_wall",
+  "expected": [
+    "data_race"
+  ],
+  "headline": true,
+  "supported": true,
+  "nondeterministic": true,
+  "detected": {
+    "data_race": false
+  },
+  "n_findings": 4,
+  "ver_status": "n/a"
+}

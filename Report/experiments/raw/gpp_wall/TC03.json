@@ -1,0 +1,15 @@
+{
+  "tc": "TC03",
+  "config": "gpp_wall",
+  "expected": [
+    "uninitialized"
+  ],
+  "headline": true,
+  "supported": true,
+  "nondeterministic": true,
+  "detected": {
+    "uninitialized": true
+  },
+  "n_findings": 1,
+  "ver_status": "n/a"
+}

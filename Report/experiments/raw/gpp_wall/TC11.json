@@ -1,0 +1,15 @@
+{
+  "tc": "TC11",
+  "config": "gpp_wall",
+  "expected": [
+    "buffer_overflow"
+  ],
+  "headline": true,
+  "supported": true,
+  "nondeterministic": true,
+  "detected": {
+    "buffer_overflow": false
+  },
+  "n_findings": 2,
+  "ver_status": "n/a"
+}

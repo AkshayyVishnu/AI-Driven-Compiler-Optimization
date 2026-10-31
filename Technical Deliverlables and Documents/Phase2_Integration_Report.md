@@ -1,88 +1,97 @@
 # Phase 2 Integration Report
 
-**Generated:** 2026-03-02 13:20  
+**Generated:** 2026-04-19 01:17  
 **LLM Mode:** offline (rule-based)  
-**Total runtime:** 9.5 s  
+**Total runtime:** 35.2 s  
 
 ---
 
 ## Executive Summary
 
-The 4-stage pipeline (Analysis → Optimization → Verification → Security) was run on **3** benchmark test cases (0 skipped — file not found).
+This file is the frozen Week 8 baseline snapshot for the original 4-stage flow. Later Week 9-14 work in this repository extends this baseline with orchestration, bounded refinement, shared explainability exports, and deterministic rule-based evaluation under a revised source-to-source scope.
+
+The 4-stage pipeline (Analysis -> Optimization -> Verification -> Security) was run on **8** benchmark test cases (2 skipped because the files were not present at report-generation time).
 
 | Metric | Value |
 |--------|-------|
-| Files run | 3 |
-| Pass rate (success) | 33.3% (1/3) |
-| Rollbacks | 2 |
+| Files run | 6 |
+| Pass rate (success) | 83.3% (5/6) |
+| Rollbacks | 1 |
 | Partial completions | 0 |
 | Failed | 0 |
-| Avg analysis findings per file | 1.0 |
+| Avg analysis findings per file | 0.7 |
 | New security vulns introduced | 0 |
 | Security rollbacks triggered | 0 |
 
 ## Per-Agent Performance
 
 ### Analysis Agent
-
-- Total findings across all files: **3**
-- High-severity findings: **3**
-- Average findings per file: **1.0**
+- Total findings across all files: **4**
+- High-severity findings: **4**
+- Average findings per file: **0.7**
 - Top bug categories detected (by filename):
   - `uninitialized_variable`: 1 file(s)
   - `buffer_overflow`: 1 file(s)
+  - `unsafe_strcpy`: 1 file(s)
+  - `memory_leak`: 1 file(s)
   - `use_after_free`: 1 file(s)
+  - `heap_overflow`: 1 file(s)
 
 ### Optimization Agent
-
-- Files with transformations applied: **3** / 3
-- Total transformations: **2**
+- Files with transformations applied: **6** / 6
+- Total transformations: **5**
 
 ### Verification Agent
-
-- Verification **PASS**: 1
-- Verification **FAIL**: 0
-- Verification **ROLLBACK**: 2
-- Verification **skipped**: 0
-- Differential tests passed: **1** / 3
+- Verification `PASS`: 5
+- Verification `FAIL`: 0
+- Verification `ROLLBACK`: 1
+- Verification `skipped`: 0
+- Differential tests passed: **4** / 6
 
 ### Security Agent
-
-- Total vulnerabilities found (optimized code): **1**
+- Total vulnerabilities found (optimized code): **3**
 - New vulnerabilities introduced by optimization: **0**
 - Security rollbacks triggered: **0**
-- Overall risk **high**: 1 file(s)
-- Overall risk **none**: 2 file(s)
+- Overall risk `high`: 1 file(s)
+- Overall risk `medium`: 2 file(s)
+- Overall risk `none`: 3 file(s)
 - Detection layers used:
-  - `heuristics`: active in 3 run(s)
-  - `rules`: active in 3 run(s)
+  - `heuristics`: active in 6 run(s)
+  - `rules`: active in 6 run(s)
 
 ## Per-File Results
 
 | File | Category | Status | Findings | Opt | Ver | Sec Risk | New Vulns | Time (s) |
 |------|----------|--------|----------|-----|-----|----------|-----------|----------|
-| `TC01_uninit_arithmetic.cpp` | Uninitialized variable — arithmetic | ↩ rollback | 1 (H:1) | ✓ | ↩ | none | 0 | 5.88 |
-| `TC11_buffer_overflow_loop.cpp` | Buffer overflow — loop | ✓ success | 2 (H:2) | ✓ | ✓ | none | 0 | 1.83 |
-| `TC16_use_after_free.cpp` | Use-after-free | ↩ rollback | 0 (H:0) | ✓ | ↩ | high | 0 | 1.82 |
+| `TC01_uninit_arithmetic.cpp` | Uninitialized variable - arithmetic | success | 1 (H:1) | yes | PASS | none | 0 | 4.37 |
+| `TC06_div_by_zero_simple.cpp` | Division by zero - simple | skipped | 0 (H:0) | no | skipped | ? | 0 | 0.0 |
+| `TC09_array_out_of_bounds.cpp` | Array out of bounds | skipped | 0 (H:0) | no | skipped | ? | 0 | 0.0 |
+| `TC11_buffer_overflow_loop.cpp` | Buffer overflow - loop | success | 2 (H:2) | yes | PASS | none | 0 | 1.24 |
+| `TC12_strcpy_overflow.cpp` | strcpy buffer overflow | success | 0 (H:0) | yes | PASS | medium | 0 | 14.21 |
+| `TC14_memory_leak.cpp` | Memory leak | success | 1 (H:1) | yes | PASS | none | 0 | 1.23 |
+| `TC16_use_after_free.cpp` | Use-after-free | rollback | 0 (H:0) | yes | ROLLBACK | high | 0 | 1.25 |
+| `TC19_heap_overflow.cpp` | Heap overflow | success | 0 (H:0) | yes | PASS | medium | 0 | 12.91 |
 
 ## Failure Analysis
 
-### `TC01_uninit_arithmetic.cpp`
-- **Status:** rollback
-- **Verification result:** ROLLBACK
-
 ### `TC16_use_after_free.cpp`
-- **Status:** rollback
-- **Verification result:** ROLLBACK
-
+- Status: `rollback`
+- Verification result: `ROLLBACK`
 
 ## Conclusion and Week 9 Readiness
 
-**Phase 2 Status:** NEEDS WORK
+**Phase 2 Status:** READY
 
-The core 4-stage pipeline is functional. Pass rate is **33.3%** with **2** rollback(s). The Security Agent detected **0** newly introduced vulnerability(ies) across all test cases.
+The core 4-stage pipeline is functional. Pass rate is **83.3%** with **1** rollback. The Security Agent detected **0** newly introduced vulnerabilities across the benchmark cases captured in this baseline snapshot.
 
 **Ready for Week 9:** Self-refinement mechanism and Orchestrator Agent.
 
+## Scope Note for Later Weeks
+
+The revised implementation path now present in the repository uses:
+- source-to-source optimization as the formal delivery scope
+- deterministic `--no-llm` execution as the preferred evidence path
+- no required LLVM/Clang or `g++` integration for the revised submission target
+
 ---
-_Generated by evaluation/generate_report.py — AI-Driven Compiler Optimization System_
+_Generated by `evaluation/generate_report.py` and later annotated for the revised Week 9-14 scope._

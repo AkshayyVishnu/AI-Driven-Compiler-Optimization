@@ -1,0 +1,15 @@
+{
+  "tc": "TC40",
+  "config": "gpp_wall",
+  "expected": [
+    "leak"
+  ],
+  "headline": false,
+  "supported": true,
+  "nondeterministic": false,
+  "detected": {
+    "leak": false
+  },
+  "n_findings": 0,
+  "ver_status": "n/a"
+}

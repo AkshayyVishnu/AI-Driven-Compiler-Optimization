@@ -1,0 +1,29 @@
+{
+  "tc": "TC56",
+  "config": "gpp_wall",
+  "expected": [
+    "uninitialized",
+    "buffer_overflow",
+    "leak",
+    "div_by_zero",
+    "type_conversion",
+    "dead_code",
+    "logic_error",
+    "performance"
+  ],
+  "headline": false,
+  "supported": true,
+  "nondeterministic": true,
+  "detected": {
+    "uninitialized": false,
+    "buffer_overflow": false,
+    "leak": false,
+    "div_by_zero": false,
+    "type_conversion": true,
+    "dead_code": false,
+    "logic_error": false,
+    "performance": false
+  },
+  "n_findings": 4,
+  "ver_status": "n/a"
+}

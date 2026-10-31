@@ -1,0 +1,707 @@
+{
+  "TC01": {
+    "expected": [
+      "uninitialized"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "int x read before init",
+    "sol_file": "SOL01_uninit_arithmetic.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": true
+  },
+  "TC02": {
+    "expected": [
+      "uninitialized"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "uninit int used as array index",
+    "sol_file": "SOL02_uninit_array_index.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": true
+  },
+  "TC03": {
+    "expected": [
+      "uninitialized"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "write through uninit pointer",
+    "sol_file": "SOL03_uninit_pointer.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": true
+  },
+  "TC04": {
+    "expected": [
+      "uninitialized"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "uninit bool in if condition",
+    "sol_file": "SOL04_uninit_condition.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": true
+  },
+  "TC05": {
+    "expected": [
+      "uninitialized"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "uninit struct members read",
+    "sol_file": "SOL05_uninit_struct.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": true
+  },
+  "TC06": {
+    "expected": [
+      "div_by_zero"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "int / literal 0",
+    "sol_file": "SOL06_div_by_zero_const.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": false
+  },
+  "TC07": {
+    "expected": [
+      "div_by_zero"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "int / variable holding 0",
+    "sol_file": "SOL07_div_by_zero_var.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": false
+  },
+  "TC08": {
+    "expected": [
+      "div_by_zero"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "int % variable holding 0",
+    "sol_file": "SOL08_modulo_by_zero.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": false
+  },
+  "TC09": {
+    "expected": [
+      "buffer_overflow"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "arr[10] on int[5] (read)",
+    "sol_file": "SOL09_array_oob_positive.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": true
+  },
+  "TC10": {
+    "expected": [
+      "buffer_overflow"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "arr[-1] negative index read",
+    "sol_file": "SOL10_array_negative_index.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": true
+  },
+  "TC11": {
+    "expected": [
+      "buffer_overflow"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "loop i<=3 writes arr[3] of int[3]",
+    "sol_file": "SOL11_buffer_overflow_loop.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": true
+  },
+  "TC12": {
+    "expected": [
+      "buffer_overflow"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "strcpy long string into char[10]",
+    "sol_file": "SOL12_strcpy_overflow.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": true
+  },
+  "TC13": {
+    "expected": [
+      "buffer_overflow"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "sprintf overflow of char[10]",
+    "sol_file": "SOL13_sprintf_overflow.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": true
+  },
+  "TC19": {
+    "expected": [
+      "buffer_overflow"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "strcpy 39 chars into new char[10] (heap overflow)",
+    "sol_file": "SOL19_heap_overflow.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": true
+  },
+  "TC31": {
+    "expected": [
+      "buffer_overflow"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "loop 1..10 over int[10] (off-by-one OOB read)",
+    "sol_file": "SOL31_off_by_one.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": true
+  },
+  "TC46": {
+    "expected": [
+      "buffer_overflow"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "cin >> char[5] unbounded input",
+    "sol_file": "SOL46_unbounded_input.cpp",
+    "reads_stdin": true,
+    "compiles_here": true,
+    "nondeterministic": true
+  },
+  "TC14": {
+    "expected": [
+      "leak"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "new int[100] never deleted",
+    "sol_file": "SOL14_memory_leak.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": false
+  },
+  "TC20": {
+    "expected": [
+      "leak"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "new int in loop never deleted",
+    "sol_file": "SOL20_leak_in_loop.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": false
+  },
+  "TC40": {
+    "expected": [
+      "leak"
+    ],
+    "headline": false,
+    "supported": true,
+    "intended_bug": "ifstream never explicitly closed (RAII closes it; arguably not a real bug)",
+    "sol_file": "SOL40_file_leak.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": false
+  },
+  "TC41": {
+    "expected": [
+      "leak"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "new[] leaked on early return",
+    "sol_file": "SOL41_leak_early_return.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": false
+  },
+  "TC42": {
+    "expected": [
+      "leak"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "new[] leaked via exception path / return in catch",
+    "sol_file": "SOL42_leak_exception.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": false
+  },
+  "TC43": {
+    "expected": [
+      "leak"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "first new int overwritten (lost pointer)",
+    "sol_file": "SOL43_lost_pointer.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": false
+  },
+  "TC15": {
+    "expected": [
+      "double_free"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "delete same pointer twice",
+    "sol_file": "SOL15_double_free.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": true
+  },
+  "TC16": {
+    "expected": [
+      "use_after_free"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "read *ptr after delete",
+    "sol_file": "SOL16_use_after_free.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": true
+  },
+  "TC21": {
+    "expected": [
+      "use_after_free"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "write *ptr after delete",
+    "sol_file": "SOL21_write_after_free.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": true
+  },
+  "TC25": {
+    "expected": [
+      "use_after_free"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "member deleted then dereferenced (also double delete in dtor)",
+    "sol_file": "SOL25_class_use_after_delete.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": true
+  },
+  "TC17": {
+    "expected": [
+      "invalid_free"
+    ],
+    "headline": true,
+    "supported": false,
+    "intended_bug": "new[] released with delete",
+    "sol_file": "SOL17_mismatched_delete.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": true
+  },
+  "TC18": {
+    "expected": [
+      "invalid_free"
+    ],
+    "headline": true,
+    "supported": false,
+    "intended_bug": "delete of address of stack var",
+    "sol_file": "SOL18_delete_stack.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": true
+  },
+  "TC22": {
+    "expected": [
+      "null_deref"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "write through nullptr",
+    "sol_file": "SOL22_null_deref.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": false
+  },
+  "TC26": {
+    "expected": [
+      "null_deref"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "deref nullptr inside ptr==nullptr branch",
+    "sol_file": "SOL26_null_check_deref.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": false
+  },
+  "TC23": {
+    "expected": [
+      "invalid_pointer"
+    ],
+    "headline": true,
+    "supported": false,
+    "intended_bug": "return address of local, then deref",
+    "sol_file": "SOL23_dangling_ptr_scope.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": true
+  },
+  "TC24": {
+    "expected": [
+      "invalid_pointer"
+    ],
+    "headline": true,
+    "supported": false,
+    "intended_bug": "ptr += 100 past int[5], deref",
+    "sol_file": "SOL24_wild_ptr_arith.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": true
+  },
+  "TC27": {
+    "expected": [
+      "int_arith"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "INT_MAX + 1 signed overflow",
+    "sol_file": "SOL27_int_overflow.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": false
+  },
+  "TC28": {
+    "expected": [
+      "int_arith"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "INT_MIN - 1 signed underflow",
+    "sol_file": "SOL28_int_underflow.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": false
+  },
+  "TC29": {
+    "expected": [
+      "int_arith"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "int vs unsigned comparison (-1 > 1u)",
+    "sol_file": "SOL29_signed_unsigned_cmp.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": false
+  },
+  "TC30": {
+    "expected": [
+      "int_arith"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "1 << 32 shift past width",
+    "sol_file": "SOL30_shift_overflow.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": true
+  },
+  "TC50": {
+    "expected": [
+      "int_arith"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "malloc(size+1) overflow with unsigned input, then loop <= size",
+    "sol_file": "SOL50_alloc_overflow.cpp",
+    "reads_stdin": true,
+    "compiles_here": true,
+    "nondeterministic": false
+  },
+  "TC32": {
+    "expected": [
+      "logic_error"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "if (x = 10) assignment instead of ==",
+    "sol_file": "SOL32_assign_vs_compare.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": false
+  },
+  "TC33": {
+    "expected": [
+      "logic_error"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "",
+    "sol_file": "instead of && in range check",
+    "reads_stdin": false,
+    "compiles_here": false,
+    "nondeterministic": false
+  },
+  "TC38": {
+    "expected": [
+      "logic_error"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "missing break in switch (fallthrough)",
+    "sol_file": "SOL38_switch_fallthrough.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": false
+  },
+  "TC39": {
+    "expected": [
+      "logic_error"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "if (x>0); stray semicolon empty body",
+    "sol_file": "SOL39_empty_if_body.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": false
+  },
+  "TC34": {
+    "expected": [
+      "nontermination"
+    ],
+    "headline": true,
+    "supported": false,
+    "intended_bug": "recursion with no base case",
+    "sol_file": "SOL34_infinite_recursion.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": false
+  },
+  "TC37": {
+    "expected": [
+      "nontermination"
+    ],
+    "headline": true,
+    "supported": false,
+    "intended_bug": "while loop never increments i",
+    "sol_file": "SOL37_infinite_loop.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": false
+  },
+  "TC35": {
+    "expected": [
+      "dead_code"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "statement after return (dead code)",
+    "sol_file": "SOL35_unreachable_code.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": false
+  },
+  "TC36": {
+    "expected": [
+      "missing_return"
+    ],
+    "headline": true,
+    "supported": false,
+    "intended_bug": "non-void fn falls off end (a==b)",
+    "sol_file": "SOL36_missing_return.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": true
+  },
+  "TC44": {
+    "expected": [
+      "type_conversion"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "long long to int narrowing",
+    "sol_file": "SOL44_narrowing_conv.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": false
+  },
+  "TC45": {
+    "expected": [
+      "type_conversion"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "double to int truncation",
+    "sol_file": "SOL45_float_truncation.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": false
+  },
+  "TC47": {
+    "expected": [
+      "type_conversion"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "double reinterpreted via int* (strict aliasing)",
+    "sol_file": "SOL47_type_punning.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": false
+  },
+  "TC48": {
+    "expected": [
+      "format_string"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "printf(userInput) format string",
+    "sol_file": "SOL48_format_string.cpp",
+    "reads_stdin": true,
+    "compiles_here": true,
+    "nondeterministic": false
+  },
+  "TC49": {
+    "expected": [
+      "command_injection"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "system(\"cat \"+input) command injection",
+    "sol_file": "SOL49_command_injection.cpp",
+    "reads_stdin": true,
+    "compiles_here": true,
+    "nondeterministic": false
+  },
+  "TC51": {
+    "expected": [
+      "toctou"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "stat() check then ifstream open (TOCTOU)",
+    "sol_file": "SOL51_toctou.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": false
+  },
+  "TC52": {
+    "expected": [
+      "hardcoded_secret"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "hardcoded adminPass literal",
+    "sol_file": "SOL52_hardcoded_creds.cpp",
+    "reads_stdin": true,
+    "compiles_here": true,
+    "nondeterministic": false
+  },
+  "TC53": {
+    "expected": [
+      "data_race"
+    ],
+    "headline": true,
+    "supported": true,
+    "intended_bug": "unsynchronised sharedCounter++ in two threads",
+    "sol_file": "SOL53_data_race.cpp",
+    "reads_stdin": false,
+    "compiles_here": false,
+    "nondeterministic": true
+  },
+  "TC54": {
+    "expected": [
+      "deadlock"
+    ],
+    "headline": true,
+    "supported": false,
+    "intended_bug": "opposite lock order on two mutexes (deadlock)",
+    "sol_file": "SOL54_deadlock.cpp",
+    "reads_stdin": false,
+    "compiles_here": false,
+    "nondeterministic": true
+  },
+  "TC55": {
+    "expected": [
+      "object_slicing"
+    ],
+    "headline": true,
+    "supported": false,
+    "intended_bug": "pass Derived by value to Base param (slicing)",
+    "sol_file": "SOL55_object_slicing.cpp",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": false
+  },
+  "TC56": {
+    "expected": [
+      "uninitialized",
+      "buffer_overflow",
+      "leak",
+      "div_by_zero",
+      "type_conversion",
+      "dead_code",
+      "logic_error",
+      "performance"
+    ],
+    "headline": false,
+    "supported": true,
+    "intended_bug": "13 deliberate rule violations (see file header)",
+    "sol_file": null,
+    "reads_stdin": false,
+    "compiles_here": false,
+    "nondeterministic": true
+  },
+  "TC57": {
+    "expected": [
+      "uninitialized",
+      "buffer_overflow"
+    ],
+    "headline": false,
+    "supported": true,
+    "intended_bug": "uninit total/result, off-by-one i<=SIZE, strcpy to char[32]",
+    "sol_file": null,
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": true
+  },
+  "TestCase1": {
+    "expected": [
+      "uninitialized",
+      "div_by_zero"
+    ],
+    "headline": false,
+    "supported": true,
+    "intended_bug": "uninit x used in sum; y / 0; no return in main",
+    "sol_file": "testCase1",
+    "reads_stdin": false,
+    "compiles_here": true,
+    "nondeterministic": true
+  }
+}

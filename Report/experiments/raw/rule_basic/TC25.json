@@ -1,0 +1,44 @@
+{
+  "tc": "TC25",
+  "config": "rule_basic",
+  "expected": [
+    "use_after_free"
+  ],
+  "headline": true,
+  "supported": true,
+  "nondeterministic": true,
+  "detected": {
+    "use_after_free": true
+  },
+  "n_findings": 2,
+  "detect_s": 0.016,
+  "pipeline_status": "rollback",
+  "pipeline_s": 1.68,
+  "ver_status": "ROLLBACK",
+  "sec_status": "PASS",
+  "diff_passed": false,
+  "transformations": [],
+  "stage_timings": {
+    "analysis": {
+      "parse_s": 0.0003,
+      "rule_s": 0.0025,
+      "llm_s": 0.0
+    },
+    "optimization": {
+      "rule_s": 0.0006,
+      "llm_s": 0.0
+    },
+    "verification": {
+      "parallel_checks_s": 1.6772,
+      "llm_s": 0.0
+    },
+    "security": {
+      "total_s": 0.0033
+    }
+  },
+  "llm_fallback": false,
+  "code_changed": false,
+  "corrected_detector": false,
+  "output_matches_sol": null,
+  "fp_on_sol": false
+}

@@ -1,0 +1,27 @@
+{
+  "headline_cases": 54,
+  "detected_overall": 18,
+  "detection_rate_overall": 0.3333333333333333,
+  "supported_cases": 45,
+  "detection_rate_within_coverage": 0.4,
+  "multi_rule_recall": 0.8333333333333334,
+  "corrected_detector_judged": 4,
+  "corrected_denominator": 18,
+  "ver_status_counts": {
+    "PASS": 54,
+    "ROLLBACK": 3,
+    "TIMEOUT": 1
+  },
+  "errors": [
+    {
+      "tc": "TC37",
+      "error": "timeout"
+    }
+  ],
+  "rows_total": 58,
+  "output_matches_sol": 9,
+  "output_sol_checked": 27,
+  "fp_on_sol": 6,
+  "fp_denominator": 54,
+  "llm_fallback": 0
+}

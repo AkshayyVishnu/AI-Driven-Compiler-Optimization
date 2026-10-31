@@ -1,7 +1,7 @@
 """
 Agent Framework Package
 
-Multi-agent communication framework for AI-Driven Compiler Optimization System
+Multi-agent communication framework for DeepCompile
 """
 
 from .message_protocol import Message, MessageType, MessagePriority, MessageValidator

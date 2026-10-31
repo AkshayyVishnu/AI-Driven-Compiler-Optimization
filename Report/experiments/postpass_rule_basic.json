@@ -1,0 +1,177 @@
+{
+  "counts": {
+    "not_fixed": 18,
+    "bug_not_visible_in_output": 9,
+    "unchecked": 1
+  },
+  "rows": [
+    {
+      "tc": "TC06",
+      "original_matches_sol": false,
+      "final_matches_sol": false,
+      "outcome": "not_fixed"
+    },
+    {
+      "tc": "TC07",
+      "original_matches_sol": false,
+      "final_matches_sol": false,
+      "outcome": "not_fixed"
+    },
+    {
+      "tc": "TC08",
+      "original_matches_sol": false,
+      "final_matches_sol": false,
+      "outcome": "not_fixed"
+    },
+    {
+      "tc": "TC14",
+      "original_matches_sol": true,
+      "final_matches_sol": true,
+      "outcome": "bug_not_visible_in_output"
+    },
+    {
+      "tc": "TC20",
+      "original_matches_sol": true,
+      "final_matches_sol": true,
+      "outcome": "bug_not_visible_in_output"
+    },
+    {
+      "tc": "TC40",
+      "original_matches_sol": true,
+      "final_matches_sol": true,
+      "outcome": "bug_not_visible_in_output"
+    },
+    {
+      "tc": "TC41",
+      "original_matches_sol": true,
+      "final_matches_sol": true,
+      "outcome": "bug_not_visible_in_output"
+    },
+    {
+      "tc": "TC42",
+      "original_matches_sol": true,
+      "final_matches_sol": true,
+      "outcome": "bug_not_visible_in_output"
+    },
+    {
+      "tc": "TC43",
+      "original_matches_sol": true,
+      "final_matches_sol": true,
+      "outcome": "bug_not_visible_in_output"
+    },
+    {
+      "tc": "TC22",
+      "original_matches_sol": false,
+      "final_matches_sol": false,
+      "outcome": "not_fixed"
+    },
+    {
+      "tc": "TC26",
+      "original_matches_sol": false,
+      "final_matches_sol": false,
+      "outcome": "not_fixed"
+    },
+    {
+      "tc": "TC27",
+      "original_matches_sol": false,
+      "final_matches_sol": false,
+      "outcome": "not_fixed"
+    },
+    {
+      "tc": "TC28",
+      "original_matches_sol": false,
+      "final_matches_sol": false,
+      "outcome": "not_fixed"
+    },
+    {
+      "tc": "TC29",
+      "original_matches_sol": false,
+      "final_matches_sol": false,
+      "outcome": "not_fixed"
+    },
+    {
+      "tc": "TC50",
+      "original_matches_sol": false,
+      "final_matches_sol": false,
+      "outcome": "not_fixed"
+    },
+    {
+      "tc": "TC32",
+      "original_matches_sol": false,
+      "final_matches_sol": false,
+      "outcome": "not_fixed"
+    },
+    {
+      "tc": "TC38",
+      "original_matches_sol": false,
+      "final_matches_sol": false,
+      "outcome": "not_fixed"
+    },
+    {
+      "tc": "TC39",
+      "original_matches_sol": true,
+      "final_matches_sol": true,
+      "outcome": "bug_not_visible_in_output"
+    },
+    {
+      "tc": "TC34",
+      "original_matches_sol": false,
+      "final_matches_sol": false,
+      "outcome": "not_fixed"
+    },
+    {
+      "tc": "TC35",
+      "original_matches_sol": false,
+      "final_matches_sol": false,
+      "outcome": "not_fixed"
+    },
+    {
+      "tc": "TC44",
+      "original_matches_sol": null,
+      "final_matches_sol": null,
+      "outcome": "unchecked"
+    },
+    {
+      "tc": "TC45",
+      "original_matches_sol": false,
+      "final_matches_sol": false,
+      "outcome": "not_fixed"
+    },
+    {
+      "tc": "TC47",
+      "original_matches_sol": false,
+      "final_matches_sol": false,
+      "outcome": "not_fixed"
+    },
+    {
+      "tc": "TC48",
+      "original_matches_sol": false,
+      "final_matches_sol": false,
+      "outcome": "not_fixed"
+    },
+    {
+      "tc": "TC49",
+      "original_matches_sol": true,
+      "final_matches_sol": true,
+      "outcome": "bug_not_visible_in_output"
+    },
+    {
+      "tc": "TC51",
+      "original_matches_sol": false,
+      "final_matches_sol": false,
+      "outcome": "not_fixed"
+    },
+    {
+      "tc": "TC52",
+      "original_matches_sol": true,
+      "final_matches_sol": true,
+      "outcome": "bug_not_visible_in_output"
+    },
+    {
+      "tc": "TC55",
+      "original_matches_sol": false,
+      "final_matches_sol": false,
+      "outcome": "not_fixed"
+    }
+  ]
+}

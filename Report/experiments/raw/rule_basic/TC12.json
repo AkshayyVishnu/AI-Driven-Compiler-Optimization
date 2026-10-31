@@ -1,0 +1,44 @@
+{
+  "tc": "TC12",
+  "config": "rule_basic",
+  "expected": [
+    "buffer_overflow"
+  ],
+  "headline": true,
+  "supported": true,
+  "nondeterministic": true,
+  "detected": {
+    "buffer_overflow": true
+  },
+  "n_findings": 3,
+  "detect_s": 0.011,
+  "pipeline_status": "success",
+  "pipeline_s": 2.329,
+  "ver_status": "PASS",
+  "sec_status": "PASS",
+  "diff_passed": true,
+  "transformations": [],
+  "stage_timings": {
+    "analysis": {
+      "parse_s": 0.0002,
+      "rule_s": 0.0008,
+      "llm_s": 0.0
+    },
+    "optimization": {
+      "rule_s": 0.0005,
+      "llm_s": 0.0
+    },
+    "verification": {
+      "parallel_checks_s": 2.3268,
+      "llm_s": 0.0
+    },
+    "security": {
+      "total_s": 0.0023
+    }
+  },
+  "llm_fallback": false,
+  "code_changed": false,
+  "corrected_detector": false,
+  "output_matches_sol": null,
+  "fp_on_sol": false
+}

@@ -1,0 +1,15 @@
+{
+  "tc": "TC55",
+  "config": "gpp_wall",
+  "expected": [
+    "object_slicing"
+  ],
+  "headline": true,
+  "supported": false,
+  "nondeterministic": false,
+  "detected": {
+    "object_slicing": false
+  },
+  "n_findings": 0,
+  "ver_status": "n/a"
+}

@@ -1,0 +1,15 @@
+{
+  "tc": "TC38",
+  "config": "gpp_wall",
+  "expected": [
+    "logic_error"
+  ],
+  "headline": true,
+  "supported": true,
+  "nondeterministic": false,
+  "detected": {
+    "logic_error": false
+  },
+  "n_findings": 0,
+  "ver_status": "n/a"
+}

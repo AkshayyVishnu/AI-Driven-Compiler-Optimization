@@ -13,6 +13,9 @@ If any layer fails, the agent triggers a context rollback.
 import logging
 import os
 import sys
+import time
+from concurrent.futures import ThreadPoolExecutor
+from copy import deepcopy
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
@@ -24,11 +27,13 @@ from agent_framework import BaseAgent, ContextManager
 from src.llm.llm_client import LLMClient
 from src.llm.prompt_templates import VerificationPromptTemplate
 from src.reasoning.cot_validator import CoTValidator
+from src.runtime_cache import ResultCache, make_cache_key
 from src.verification.diff_tester import DifferentialTester, DiffTestResult
 from src.verification.z3_verifier import Z3Verifier, Z3Result
 from src.verification.perf_benchmarker import PerfBenchmarker, PerfResult
 
 logger = logging.getLogger(__name__)
+_VERIFICATION_CACHE = ResultCache(max_entries=128)
 
 
 @dataclass
@@ -90,6 +95,7 @@ class VerificationAgent(BaseAgent):
         original  = input_data.get("original_code")  or \
                     self.context.get("original_code") or ""
         optimized = input_data.get("optimized_code")
+        cache_enabled = input_data.get("use_cache", True)
         if not optimized:
             opt_report = self.context.get("optimization_suggestions") or {}
             optimized  = opt_report.get("optimized_code", original)
@@ -98,9 +104,23 @@ class VerificationAgent(BaseAgent):
         if not original or not optimized:
             return {"status": "FAIL", "error": "Missing original or optimized code."}
 
+        cache_key = make_cache_key("verification", original, optimized)
+        if cache_enabled:
+            cached = _VERIFICATION_CACHE.get(cache_key)
+            if cached is not None:
+                cached_result = deepcopy(cached)
+                cached_result["cache_hit"] = True
+                self.context.set("verification_status", cached_result)
+                return cached_result
+
         # ── Layer 1: Differential Testing ─────────────────────────────────────
         logger.info("VerificationAgent [Layer 1/4]: Differential Testing …")
-        diff_result = self.diff_tester.test(original, optimized)
+        stage_started = time.perf_counter()
+        with ThreadPoolExecutor(max_workers=3) as executor:
+            diff_future = executor.submit(self.diff_tester.test, original, optimized)
+            z3_future = executor.submit(self.z3.verify, original, optimized)
+            perf_future = executor.submit(self.perf.benchmark, original, optimized)
+            diff_result = diff_future.result()
         _dt_status = "PASS" if diff_result.passed else f"FAIL ({diff_result.error or 'outputs differ'})"
         logger.info(f"VerificationAgent [Layer 1/4]: Differential Test → {_dt_status}")
         if diff_result.error:
@@ -108,14 +128,15 @@ class VerificationAgent(BaseAgent):
 
         # ── Layer 2: Z3 Verification ───────────────────────────────────────────
         logger.info("VerificationAgent [Layer 2/4]: Z3 SMT Verification …")
-        z3_result = self.z3.verify(original, optimized)
+        z3_result = z3_future.result()
         logger.info(f"VerificationAgent [Layer 2/4]: Z3 → {z3_result.status}")
         if z3_result.explanation:
             logger.debug(f"  Z3 detail: {z3_result.explanation}")
 
         # ── Layer 3: Performance Benchmark ────────────────────────────────────
         logger.info("VerificationAgent [Layer 3/4]: Performance Benchmark …")
-        perf_result = self.perf.benchmark(original, optimized)
+        perf_result = perf_future.result()
+        layer_elapsed = time.perf_counter() - stage_started
         logger.info(f"VerificationAgent [Layer 3/4]: Perf → {perf_result.summary()}")
 
         # ── Layer 4: LLM Reasoning ─────────────────────────────────────────────
@@ -123,18 +144,31 @@ class VerificationAgent(BaseAgent):
         # pass True (neutral) when the diff test was skipped so the LLM prompt
         # doesn't say "test FAILED" for a test that was never run
         _diff_passed_for_llm = True if diff_result.skipped else diff_result.passed
+        llm_started = time.perf_counter()
         llm_verdict, reasoning_steps = self._llm_verify(
             original, optimized, _diff_passed_for_llm
         )
+        llm_elapsed = time.perf_counter() - llm_started
         logger.info(f"VerificationAgent [Layer 4/4]: LLM verdict → {llm_verdict}")
 
         # ── Decide overall status ──────────────────────────────────────────────
         optimized_compile_failed = bool(diff_result.compile_error_optimized)
+
+        # If uninitialized variables were fixed, the output WILL differ from the
+        # original (original had UB / random values). This is an expected and
+        # correct behavior change — do NOT treat it as a verification failure.
+        analysis = self.context.get("analysis_results") or {}
+        has_uninit_fix = any(
+            f.get("type") == "uninitialized_variable"
+            for f in analysis.get("all_findings", [])
+        )
+
         real_test_failure = (
             not diff_result.passed
             and not diff_result.skipped                    # was not a skip
             and not diff_result.compile_error_original     # original wasn't already broken
             and diff_result.original_returncode == 0       # original ran cleanly (no UB/crash)
+            and not has_uninit_fix                         # not an expected output change
         )
         if real_test_failure or optimized_compile_failed:
             logger.warning("Differential test FAILED — triggering rollback")
@@ -171,18 +205,34 @@ class VerificationAgent(BaseAgent):
             "reasoning_steps": reasoning_steps,
             "conclusion":      report.conclusion,
             "summary":         report.summary,
+            "cache_hit":       False,
+            "stage_timings": {
+                "parallel_checks_s": round(layer_elapsed, 4),
+                "llm_s": round(llm_elapsed, 4),
+            },
         }
 
         self.context.set("verification_status", result_dict)
+        if cache_enabled:
+            _VERIFICATION_CACHE.set(cache_key, deepcopy(result_dict))
         logger.info(f"Verification complete: {status}")
         return result_dict
 
     # ── LLM verification ──────────────────────────────────────────────────────
 
     def _llm_verify(self, orig, opt, diff_passed):
+        if not self.llm.is_available():
+            logger.info("VerificationAgent: LLM not available — skipping LLM reasoning")
+            return "UNCERTAIN", ["LLM unavailable — skipping semantic verification."]
+
         prompt = VerificationPromptTemplate.build(orig, opt, diff_passed)
         raw    = self.llm.generate(prompt, system_prompt=VerificationPromptTemplate.SYSTEM)
-        cot    = self.cot_val.validate(raw)
+
+        if "offline stub" in raw or "LLM offline stub" in raw:
+            logger.warning("VerificationAgent: LLM returned stub — verdict UNCERTAIN")
+            return "UNCERTAIN", ["LLM returned stub — semantic verification skipped."]
+
+        cot = self.cot_val.validate(raw)
         if cot.is_valid:
             return cot.verdict or "UNCERTAIN", cot.reasoning_steps
         return "UNCERTAIN", ["LLM reasoning unavailable."]

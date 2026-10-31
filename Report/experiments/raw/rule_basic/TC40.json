@@ -1,0 +1,44 @@
+{
+  "tc": "TC40",
+  "config": "rule_basic",
+  "expected": [
+    "leak"
+  ],
+  "headline": false,
+  "supported": true,
+  "nondeterministic": false,
+  "detected": {
+    "leak": false
+  },
+  "n_findings": 0,
+  "detect_s": 0.017,
+  "pipeline_status": "success",
+  "pipeline_s": 2.203,
+  "ver_status": "PASS",
+  "sec_status": "PASS",
+  "diff_passed": true,
+  "transformations": [],
+  "stage_timings": {
+    "analysis": {
+      "parse_s": 0.0003,
+      "rule_s": 0.0015,
+      "llm_s": 0.0
+    },
+    "optimization": {
+      "rule_s": 0.0012,
+      "llm_s": 0.0
+    },
+    "verification": {
+      "parallel_checks_s": 2.1988,
+      "llm_s": 0.0
+    },
+    "security": {
+      "total_s": 0.0025
+    }
+  },
+  "llm_fallback": false,
+  "code_changed": false,
+  "corrected_detector": null,
+  "output_matches_sol": true,
+  "fp_on_sol": false
+}

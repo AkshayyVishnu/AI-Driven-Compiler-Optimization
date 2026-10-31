@@ -14,10 +14,12 @@ Requires g++ on PATH. Falls back gracefully if unavailable.
 
 import logging
 import os
+import shutil
 import subprocess
-import tempfile
 from dataclasses import dataclass
 from typing import Optional
+
+from src.temp_paths import new_runtime_workspace
 
 logger = logging.getLogger(__name__)
 
@@ -34,18 +36,44 @@ _TIMING_PREFIX = "#define main __orig_main__\n"
 # differential testing output comparison is unaffected).
 _TIMING_HARNESS = r"""
 #ifdef __cplusplus
+#undef main
+// Overloads pick the right call for int main() and int main(int, char**).
+static int _call_orig(int (*f)(int, char**), int c, char** v) { return f(c, v); }
+static int _call_orig(int (*f)(), int, char**) { return f(); }
+extern "C" int __perf_call_orig(int argc, char** argv) {
+    return _call_orig(__orig_main__, argc, argv);
+}
+#endif
+"""
+
+# Second translation unit: owns main() and the timer, so the user's source never
+# sees <windows.h> (it clashes with user macros such as SIZE).
+_PERF_MAIN = r"""
 #include <chrono>
 #include <cstdio>
+#ifdef _WIN32
+// MinGW GCC 6 std::chrono clocks tick ~15 ms; QueryPerformanceCounter does not.
+#include <windows.h>
+static long long _now_ns() {
+    LARGE_INTEGER f, c;
+    QueryPerformanceFrequency(&f);
+    QueryPerformanceCounter(&c);
+    return (long long)((double)c.QuadPart * 1e9 / (double)f.QuadPart);
+}
+#else
+static long long _now_ns() {
+    return std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::steady_clock::now().time_since_epoch()).count();
+}
+#endif
+extern "C" int __perf_call_orig(int, char**);
 int main(int argc, char* argv[]) {
-    auto _t0 = std::chrono::high_resolution_clock::now();
-    int  _r  = __orig_main__(argc, argv);
-    auto _t1 = std::chrono::high_resolution_clock::now();
-    long long _ns = std::chrono::duration_cast<
-        std::chrono::nanoseconds>(_t1 - _t0).count();
+    long long _t0 = _now_ns();
+    int _r = __perf_call_orig(argc, argv);
+    long long _ns = _now_ns() - _t0;
     fprintf(stderr, "__PERF_NS__:%lld\n", _ns);
     return _r;
 }
-#endif
 """
 
 
@@ -98,7 +126,8 @@ class PerfBenchmarker:
                 error="g++ not found; performance benchmarking skipped.",
             )
 
-        with tempfile.TemporaryDirectory() as tmpdir:
+        tmpdir = new_runtime_workspace("perf")
+        try:
             orig_cpp = os.path.join(tmpdir, "original.cpp")
             opt_cpp  = os.path.join(tmpdir, "optimized.cpp")
             orig_bin = os.path.join(tmpdir, "original.exe")
@@ -127,6 +156,8 @@ class PerfBenchmarker:
                 optimized_ms=opt_ms,
                 speedup_pct=speedup,
             )
+        finally:
+            shutil.rmtree(tmpdir, ignore_errors=True)
 
     # ── Internals ─────────────────────────────────────────────────────────────
 
@@ -142,8 +173,11 @@ class PerfBenchmarker:
             wrapped = _TIMING_PREFIX + original + _TIMING_HARNESS
             with open(src_path, "w", encoding="utf-8") as f:
                 f.write(wrapped)
+            main_path = os.path.join(os.path.dirname(src_path), "perf_main.cpp")
+            with open(main_path, "w", encoding="utf-8") as f:
+                f.write(_PERF_MAIN)
             proc = subprocess.run(
-                [self.compiler, src_path, "-o", out_path, "-O0", "-w"],
+                [self.compiler, src_path, main_path, "-o", out_path, "-O0", "-w"],
                 capture_output=True,
                 text=True,
                 timeout=self.timeout,

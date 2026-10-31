@@ -10,10 +10,12 @@ Falls back gracefully if g++ is unavailable.
 
 import logging
 import os
+import shutil
 import subprocess
-import tempfile
 from dataclasses import dataclass
 from typing import Optional
+
+from src.temp_paths import new_runtime_workspace
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +66,8 @@ class DifferentialTester:
                 error="g++ not found on PATH; differential test skipped.",
             )
 
-        with tempfile.TemporaryDirectory() as tmpdir:
+        tmpdir = new_runtime_workspace("diff")
+        try:
             orig_src_path = os.path.join(tmpdir, "original.cpp")
             opt_src_path  = os.path.join(tmpdir, "optimized.cpp")
             orig_bin      = os.path.join(tmpdir, "original.exe")
@@ -113,6 +116,8 @@ class DifferentialTester:
                 original_returncode=orig_rc,
                 optimized_returncode=opt_rc,
             )
+        finally:
+            shutil.rmtree(tmpdir, ignore_errors=True)
 
     # ── Internals ─────────────────────────────────────────────────────────────
 

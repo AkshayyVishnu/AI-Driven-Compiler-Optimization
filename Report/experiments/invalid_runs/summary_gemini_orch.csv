@@ -1,0 +1,25 @@
+tc,headline,expected,detected,n_findings,ver_status,sec_status,code_changed,corrected_detector,output_matches_sol,fp_on_sol,llm_fallback,pipeline_s,workflow_status,iterations
+TC01,True,"[""uninitialized""]","{""uninitialized"": true}",3,PASS,PASS,True,True,,,False,24.264,PASS,0
+TC07,True,"[""div_by_zero""]","{""div_by_zero"": true}",2,PASS,PASS,False,False,False,,True,3.537,PASS,0
+TC12,True,"[""buffer_overflow""]","{""buffer_overflow"": true}",3,PASS,PASS,False,False,,,True,8.716,PASS,0
+TC14,True,"[""leak""]","{""leak"": true}",4,PASS,PASS,True,True,True,,True,18.715,PASS,0
+TC15,True,"[""double_free""]","{""double_free"": false}",0,PASS,PASS,False,,,,True,3.532,PASS,0
+TC16,True,"[""use_after_free""]","{""use_after_free"": true}",2,ROLLBACK,PASS,False,False,,,True,2.782,ESCALATE,1
+TC17,True,"[""invalid_free""]","{""invalid_free"": true}",4,PASS,PASS,True,True,,,True,22.323,PASS,0
+TC22,True,"[""null_deref""]","{""null_deref"": true}",1,PASS,PASS,False,False,False,,True,2.751,PASS,0
+TC23,True,"[""invalid_pointer""]","{""invalid_pointer"": false}",0,PASS,PASS,False,,,,True,3.017,PASS,0
+TC27,True,"[""int_arith""]","{""int_arith"": true}",2,PASS,PASS,False,False,False,,True,2.844,PASS,0
+TC32,True,"[""logic_error""]","{""logic_error"": false}",0,PASS,PASS,False,,False,,True,2.937,PASS,0
+TC34,True,"[""nontermination""]","{""nontermination"": false}",0,PASS,PASS,False,,False,,True,2.66,PASS,0
+TC35,True,"[""dead_code""]","{""dead_code"": true}",1,PASS,PASS,True,False,False,,True,3.089,PASS,0
+TC36,True,"[""missing_return""]","{""missing_return"": false}",0,PASS,PASS,False,,,,True,2.788,PASS,0
+TC44,True,"[""type_conversion""]","{""type_conversion"": false}",0,PASS,PASS,False,,,,True,2.73,PASS,0
+TC48,True,"[""format_string""]","{""format_string"": true}",2,PASS,PASS,False,False,False,,True,2.126,PASS,0
+TC49,True,"[""command_injection""]","{""command_injection"": true}",1,PASS,PASS,False,False,True,,True,4.187,PASS,0
+TC51,True,"[""toctou""]","{""toctou"": false}",0,PASS,PASS,False,,False,,True,2.987,PASS,0
+TC52,True,"[""hardcoded_secret""]","{""hardcoded_secret"": true}",2,PASS,PASS,False,False,True,,True,2.609,PASS,0
+TC53,True,"[""data_race""]","{""data_race"": false}",0,PASS,PASS,True,,,,True,1.843,PASS,0
+TC54,True,"[""deadlock""]","{""deadlock"": false}",0,PASS,PASS,False,,,,True,1.501,PASS,0
+TC55,True,"[""object_slicing""]","{""object_slicing"": false}",0,PASS,PASS,False,,False,,True,2.757,PASS,0
+TC56,False,"[""uninitialized"", ""buffer_overflow"", ""leak"", ""div_by_zero"", ""type_conversion"", ""dead_code"", ""logic_error"", ""performance""]","{""uninitialized"": true, ""buffer_overflow"": true, ""leak"": true, ""div_by_zero"": true, ""type_conversion"": true, ""dead_code"": true, ""logic_error"": true, ""performance"": true}",27,PASS,PASS,True,False,,,True,3.476,PASS,0
+TC57,False,"[""uninitialized"", ""buffer_overflow""]","{""uninitialized"": false, ""buffer_overflow"": true}",15,PASS,PASS,True,,,,True,3.111,PASS,0

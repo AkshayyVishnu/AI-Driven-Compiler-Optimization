@@ -1,0 +1,49 @@
+{
+  "tc": "TC14",
+  "config": "rule_orch",
+  "expected": [
+    "leak"
+  ],
+  "headline": true,
+  "supported": true,
+  "nondeterministic": false,
+  "detected": {
+    "leak": false
+  },
+  "n_findings": 2,
+  "detect_s": 0.015,
+  "workflow_status": "PASS",
+  "iterations": 0,
+  "stop_reason": "initial_pass",
+  "pipeline_status": "success",
+  "pipeline_s": 1.774,
+  "ver_status": "PASS",
+  "sec_status": "PASS",
+  "diff_passed": true,
+  "transformations": [
+    "prefer_preincrement"
+  ],
+  "stage_timings": {
+    "analysis": {
+      "parse_s": 0.0003,
+      "rule_s": 0.0012,
+      "llm_s": 0.0
+    },
+    "optimization": {
+      "rule_s": 0.0007,
+      "llm_s": 0.0
+    },
+    "verification": {
+      "parallel_checks_s": 1.6917,
+      "llm_s": 0.0
+    },
+    "security": {
+      "total_s": 0.0012
+    }
+  },
+  "llm_fallback": false,
+  "code_changed": true,
+  "corrected_detector": null,
+  "output_matches_sol": true,
+  "fp_on_sol": false
+}

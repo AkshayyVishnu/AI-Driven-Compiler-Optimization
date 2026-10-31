@@ -1,10 +1,11 @@
 import { useState, useCallback, useRef } from 'react'
 import {
   AlertTriangle, CheckCircle2, XCircle,
-  FileText, Diff, ShieldCheck, MessageSquare,
+  FileText, Diff, ShieldCheck, MessageSquare, ShieldAlert,
   ChevronUp, ChevronDown, CheckCheck, Check, X,
-  CopyCheck,
+  CopyCheck, Wrench,
 } from 'lucide-react'
+import SustainabilityBox from './SustainabilityBox'
 
 /* ── Severity helpers ─────────────────────────────────────────────────────── */
 
@@ -20,11 +21,13 @@ function SeverityBadge({ severity }) {
 
 /* ── Analysis Tab ─────────────────────────────────────────────────────────── */
 
-function AnalysisTab({ data }) {
+function AnalysisTab({ data, onFixError, fixedErrors = new Set() }) {
   if (!data) return <EmptyState icon={<FileText />} text="Run analysis to see findings." />
 
-  const findings = data.all_findings ?? []
-  const counts   = { high: 0, medium: 0, low: 0, info: 0 }
+  const findings   = data.all_findings ?? []
+  const llmCount   = findings.filter(f => f.source === 'llm').length
+  const ruleCount  = findings.filter(f => f.source === 'rule').length
+  const counts     = { high: 0, medium: 0, low: 0, info: 0 }
   findings.forEach(f => {
     const s = (f.severity ?? 'info').toLowerCase()
     counts[s] = (counts[s] ?? 0) + 1
@@ -53,10 +56,47 @@ function AnalysisTab({ data }) {
             <span className="severity-badge severity-low">{counts.low} Low</span>
           </div>
         )}
+        {llmCount > 0 && (
+          <div className="summary-item">
+            <span style={{
+              fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 3,
+              background: 'rgba(37,99,235,0.10)', color: 'var(--primary)',
+              border: '1px solid rgba(37,99,235,0.22)',
+            }}>{llmCount} LLM</span>
+          </div>
+        )}
+        {ruleCount > 0 && (
+          <div className="summary-item">
+            <span style={{
+              fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 3,
+              background: 'rgba(120,120,120,0.08)', color: 'var(--text-muted)',
+              border: '1px solid rgba(120,120,120,0.18)',
+            }}>{ruleCount} Rule</span>
+          </div>
+        )}
         {data.confidence != null && (
-          <div className="summary-item" style={{ marginLeft: 'auto' }}>
+          <div className="summary-item">
             <span className="summary-label">Confidence:</span>
             <span className="summary-value">{Math.round((data.confidence ?? 0) * 100)}%</span>
+          </div>
+        )}
+        {onFixError && findings.some(f => (f.line_number || f.line) && f.fixable !== false) && (
+          <div className="summary-item" style={{ marginLeft: 'auto' }}>
+            <button
+              onClick={() => findings
+                .filter(f => (f.line_number || f.line) && f.fixable !== false)
+                .forEach(f => onFixError({ ...f, line: f.line_number ?? f.line }))}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '5px 12px', borderRadius: 'var(--radius-sm)',
+                border: 'none', background: 'var(--primary)', color: 'white',
+                fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                fontFamily: 'inherit', boxShadow: '0 2px 8px rgba(37,99,235,0.30)',
+              }}
+            >
+              <Wrench size={12} strokeWidth={2.5} />
+              Fix All
+            </button>
           </div>
         )}
       </div>
@@ -68,30 +108,71 @@ function AnalysisTab({ data }) {
         </div>
       ) : (
         <div className="findings-grid">
-          {findings.map((f, i) => (
-            <div key={i} className="finding-card">
-              <SeverityBadge severity={f.severity} />
-              <div className="finding-details">
-                <div className="finding-type">
-                  {(f.type ?? f.issue_type ?? 'Unknown').replace(/_/g, ' ')}
+          {findings.map((f, i) => {
+            const errLine   = f.line_number ?? f.line
+            const errKey    = `${f.type ?? f.issue_type}:${errLine}`
+            const isFixed   = fixedErrors.has(errKey)
+            const canFix    = f.fixable !== false && !!errLine && !!onFixError
+            return (
+              <div key={i} className="finding-card" style={isFixed ? { borderColor: 'rgba(22,163,74,0.35)', background: 'rgba(22,163,74,0.04)' } : {}}>
+                <SeverityBadge severity={f.severity} />
+                <div className="finding-details">
+                  <div className="finding-type" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    {(f.type ?? f.issue_type ?? 'Unknown').replace(/_/g, ' ')}
+                    {f.source === 'llm' && (
+                      <span style={{
+                        fontSize: 9, fontWeight: 700, letterSpacing: '0.4px',
+                        padding: '1px 5px', borderRadius: 3,
+                        background: 'rgba(37,99,235,0.12)', color: 'var(--primary)',
+                        border: '1px solid rgba(37,99,235,0.25)', textTransform: 'uppercase',
+                      }}>LLM</span>
+                    )}
+                    {f.source === 'rule' && (
+                      <span style={{
+                        fontSize: 9, fontWeight: 700, letterSpacing: '0.4px',
+                        padding: '1px 5px', borderRadius: 3,
+                        background: 'rgba(120,120,120,0.10)', color: 'var(--text-muted)',
+                        border: '1px solid rgba(120,120,120,0.2)', textTransform: 'uppercase',
+                      }}>Rule</span>
+                    )}
+                  </div>
+                  {f.description && (
+                    <div className="finding-desc">{f.description}</div>
+                  )}
+                  {f.suggestion && (
+                    <div className="finding-desc" style={{ marginTop: 3, color: 'var(--primary)' }}>
+                      Suggestion: {f.suggestion}
+                    </div>
+                  )}
+                  {errLine && (
+                    <div className="finding-line">
+                      Line {errLine}
+                      {f.column && `:${f.column}`}
+                    </div>
+                  )}
                 </div>
-                {f.description && (
-                  <div className="finding-desc">{f.description}</div>
-                )}
-                {f.suggestion && (
-                  <div className="finding-desc" style={{ marginTop: 3, color: 'var(--primary)' }}>
-                    Suggestion: {f.suggestion}
-                  </div>
-                )}
-                {(f.line_number || f.line) && (
-                  <div className="finding-line">
-                    Line {f.line_number ?? f.line}
-                    {f.column && `:${f.column}`}
-                  </div>
+                {canFix && (
+                  <button
+                    onClick={() => onFixError({ ...f, line: errLine, type: f.type ?? f.issue_type })}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0,
+                      padding: '4px 10px', borderRadius: 'var(--radius-sm)',
+                      border: `1px solid ${isFixed ? 'rgba(22,163,74,0.4)' : 'var(--border)'}`,
+                      background: isFixed ? 'rgba(22,163,74,0.10)' : 'var(--bg-surface)',
+                      color: isFixed ? 'var(--accent-green)' : 'var(--primary)',
+                      fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                      fontFamily: 'inherit', whiteSpace: 'nowrap', transition: 'all 0.15s',
+                    }}
+                  >
+                    {isFixed
+                      ? <><Check size={11} strokeWidth={3} /> Fixed</>
+                      : <><Wrench size={11} strokeWidth={2} /> Fix</>
+                    }
+                  </button>
                 )}
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
 
@@ -179,7 +260,9 @@ function OptimizationTab({ data, onAcceptCode }) {
   }
 
   return (
-    <div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {data.sustainability && <SustainabilityBox estimate={data.sustainability} />}
+      
       {/* Summary + Accept-All / Reject-All bar */}
       <div className="summary-bar">
         <div className="summary-item">
@@ -409,7 +492,9 @@ function VerificationTab({ data }) {
   ]
 
   return (
-    <div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {data.sustainability && <SustainabilityBox estimate={data.sustainability} />}
+
       <div className="summary-bar">
         <div className="summary-item">
           <span className="summary-label">Overall:</span>
@@ -433,6 +518,211 @@ function VerificationTab({ data }) {
           </div>
         ))}
       </div>
+    </div>
+  )
+}
+
+/* ── Security Tab ─────────────────────────────────────────────────────────── */
+
+function RiskBadge({ risk }) {
+  const r = (risk ?? 'none').toLowerCase()
+  const styles = {
+    critical: { background: 'rgba(220,38,38,0.12)',  color: '#dc2626', border: '1px solid rgba(220,38,38,0.35)' },
+    high:     { background: 'rgba(234,88,12,0.12)',  color: '#ea580c', border: '1px solid rgba(234,88,12,0.35)' },
+    medium:   { background: 'rgba(202,138,4,0.12)',  color: '#ca8a04', border: '1px solid rgba(202,138,4,0.35)' },
+    low:      { background: 'rgba(22,163,74,0.10)',  color: '#16a34a', border: '1px solid rgba(22,163,74,0.30)' },
+    none:     { background: 'rgba(120,120,120,0.08)', color: 'var(--text-muted)', border: '1px solid rgba(120,120,120,0.2)' },
+  }
+  const s = styles[r] ?? styles.none
+  return (
+    <span style={{ ...s, fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 3, textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+      {r}
+    </span>
+  )
+}
+
+function computeRisk(findings) {
+  if (findings.some(f => f.severity === 'high'))   return 'high'
+  if (findings.some(f => f.severity === 'medium')) return 'medium'
+  if (findings.length > 0)                         return 'low'
+  return 'none'
+}
+
+function SecurityTab({ data, onFixAll, fixableCount = 0, onFixError, fixedErrors = new Set() }) {
+  if (!data) return <EmptyState icon={<ShieldAlert />} text="Run the pipeline or click Scan Security to see findings." />
+
+  const vulns     = data.all_vulnerabilities ?? []
+  const newVulns  = new Set((data.new_vulnerabilities ?? []).map(v => `${v.type}:${v.line}`))
+  const risk      = data.overall_risk ?? 'none'
+  const status    = (data.status ?? 'PASS').toUpperCase()
+  const statusCls = status === 'PASS' ? 'status-pill status-success' : 'status-pill status-rollback'
+
+  const counts = { high: 0, medium: 0, low: 0 }
+  vulns.forEach(v => {
+    const s = (v.severity ?? 'low').toLowerCase()
+    if (counts[s] != null) counts[s]++
+  })
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {data.sustainability && <SustainabilityBox estimate={data.sustainability} />}
+
+      {/* Summary bar */}
+      <div className="summary-bar">
+        <div className="summary-item">
+          <span className="summary-label">Status:</span>
+          <span className={statusCls}>{status}</span>
+        </div>
+        <div className="summary-item">
+          <span className="summary-label">Risk:</span>
+          <RiskBadge risk={risk} />
+        </div>
+        <div className="summary-item">
+          <span className="summary-label">Findings:</span>
+          <span className="summary-value">{vulns.length}</span>
+        </div>
+        {(data.new_vulnerabilities ?? []).length > 0 && (
+          <div className="summary-item">
+            <span style={{
+              fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 3,
+              background: 'rgba(220,38,38,0.10)', color: 'var(--accent-red)',
+              border: '1px solid rgba(220,38,38,0.25)',
+            }}>
+              {(data.new_vulnerabilities ?? []).length} New
+            </span>
+          </div>
+        )}
+        {counts.high > 0 && (
+          <div className="summary-item">
+            <span className="severity-badge severity-high">{counts.high} High</span>
+          </div>
+        )}
+        {counts.medium > 0 && (
+          <div className="summary-item">
+            <span className="severity-badge severity-medium">{counts.medium} Med</span>
+          </div>
+        )}
+        {fixableCount > 0 && onFixAll && (
+          <div className="summary-item" style={{ marginLeft: 'auto' }}>
+            <button
+              onClick={onFixAll}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '5px 12px', borderRadius: 'var(--radius-sm)',
+                border: 'none',
+                background: 'var(--primary)',
+                color: 'white',
+                fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                fontFamily: 'inherit',
+                boxShadow: '0 2px 8px rgba(37,99,235,0.30)',
+              }}
+              title={`Auto-fix ${fixableCount} fixable issue(s)`}
+            >
+              <Wrench size={12} strokeWidth={2.5} />
+              Fix All ({fixableCount})
+            </button>
+          </div>
+        )}
+      </div>
+
+      {vulns.length === 0 ? (
+        <div className="empty-state">
+          <CheckCircle2 size={28} style={{ color: 'var(--accent-green)', opacity: 1 }} />
+          <p>No security vulnerabilities detected.</p>
+        </div>
+      ) : (
+        <div className="findings-grid">
+          {vulns.map((v, i) => {
+            const isNew   = newVulns.has(`${v.type}:${v.line}`)
+            const errLine = v.line_number ?? v.line
+            const errKey  = `${v.type}:${errLine}`
+            const isFixed = fixedErrors.has(errKey)
+            const canFix  = v.fixable !== false && !!errLine && !!onFixError
+            return (
+              <div key={i} className="finding-card" style={
+                isFixed ? { borderColor: 'rgba(22,163,74,0.35)', background: 'rgba(22,163,74,0.04)' }
+                : isNew  ? { borderColor: 'rgba(220,38,38,0.35)', background: 'rgba(220,38,38,0.04)' }
+                : {}
+              }>
+                <SeverityBadge severity={v.severity} />
+                <div className="finding-details">
+                  <div className="finding-type" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    {(v.type ?? 'unknown').replace(/_/g, ' ')}
+                    {isNew && !isFixed && (
+                      <span style={{
+                        fontSize: 9, fontWeight: 700, padding: '1px 5px', borderRadius: 3,
+                        background: 'rgba(220,38,38,0.12)', color: 'var(--accent-red)',
+                        border: '1px solid rgba(220,38,38,0.3)', textTransform: 'uppercase',
+                      }}>NEW</span>
+                    )}
+                    {v.fixable === false && (
+                      <span style={{
+                        fontSize: 9, fontWeight: 600, padding: '1px 6px', borderRadius: 3,
+                        background: 'rgba(120,120,120,0.08)', color: 'var(--text-muted)',
+                        border: '1px solid rgba(120,120,120,0.22)', textTransform: 'uppercase',
+                        letterSpacing: '0.3px',
+                      }} title="Cannot be auto-fixed — requires manual remediation">manual fix</span>
+                    )}
+                    {(v.cwe_id ?? v.cwe) && (
+                      <span style={{
+                        fontSize: 9, fontWeight: 600, padding: '1px 5px', borderRadius: 3,
+                        background: 'rgba(120,120,120,0.08)', color: 'var(--text-muted)',
+                        border: '1px solid rgba(120,120,120,0.2)',
+                      }}>{v.cwe_id ?? v.cwe}</span>
+                    )}
+                    {v.source && (
+                      <span style={{
+                        fontSize: 9, fontWeight: 700, padding: '1px 5px', borderRadius: 3,
+                        background: 'rgba(37,99,235,0.10)', color: 'var(--primary)',
+                        border: '1px solid rgba(37,99,235,0.22)', textTransform: 'uppercase',
+                      }}>{v.source}</span>
+                    )}
+                  </div>
+                  {v.description && <div className="finding-desc">{v.description}</div>}
+                  {(v.recommendation ?? v.suggestion) && (
+                    <div className="finding-desc" style={{ marginTop: 3, color: 'var(--primary)' }}>
+                      Fix: {v.recommendation ?? v.suggestion}
+                    </div>
+                  )}
+                  {errLine && (
+                    <div className="finding-line">Line {errLine}</div>
+                  )}
+                </div>
+                {canFix && (
+                  <button
+                    onClick={() => onFixError({ ...v, line: errLine })}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0,
+                      padding: '4px 10px', borderRadius: 'var(--radius-sm)',
+                      border: `1px solid ${isFixed ? 'rgba(22,163,74,0.4)' : 'var(--border)'}`,
+                      background: isFixed ? 'rgba(22,163,74,0.10)' : 'var(--bg-surface)',
+                      color: isFixed ? 'var(--accent-green)' : 'var(--primary)',
+                      fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                      fontFamily: 'inherit', whiteSpace: 'nowrap', transition: 'all 0.15s',
+                    }}
+                  >
+                    {isFixed
+                      ? <><Check size={11} strokeWidth={3} /> Fixed</>
+                      : <><Wrench size={11} strokeWidth={2} /> Fix</>
+                    }
+                  </button>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {data.llm_conclusion && (
+        <div style={{
+          marginTop: 12, padding: '8px 12px',
+          background: 'var(--bg-surface-3)', borderRadius: 'var(--radius-md)',
+          fontSize: 12, color: 'var(--text-secondary)',
+          borderLeft: '3px solid var(--accent-red)',
+        }}>
+          <strong style={{ color: 'var(--accent-red)' }}>Security Verdict:</strong> {data.llm_conclusion}
+        </div>
+      )}
     </div>
   )
 }
@@ -517,10 +807,11 @@ const TABS = [
   { id: 'analysis',     label: 'Analysis',     icon: FileText      },
   { id: 'optimization', label: 'Optimized',    icon: Diff          },
   { id: 'verification', label: 'Verification', icon: ShieldCheck   },
+  { id: 'security',     label: 'Security',     icon: ShieldAlert   },
   { id: 'messages',     label: 'Messages',     icon: MessageSquare },
 ]
 
-export default function ResultsPanel({ results, onAcceptCode, messages = [] }) {
+export default function ResultsPanel({ results, onAcceptCode, messages = [], securityFindings = [], allErrors = [], fixedErrors = new Set(), onFixAll, onFixAllLocal, onFixError }) {
   const [activeTab, setActiveTab] = useState('analysis')
   const [collapsed, setCollapsed] = useState(false)
 
@@ -531,12 +822,30 @@ export default function ResultsPanel({ results, onAcceptCode, messages = [] }) {
     if (activeTab === 'analysis') setTimeout(() => setActiveTab('optimization'), 400)
   }
 
+  /* Auto-switch to Security tab whenever new security results arrive */
+  const prevSecRef = useRef(null)
+  if (results.security && prevSecRef.current !== results.security) {
+    prevSecRef.current = results.security
+    // Always switch — each new run produces a fresh object reference
+    setTimeout(() => setActiveTab('security'), 300)
+  }
+  /* Also switch early when scanner findings arrive (before agent finishes) */
+  const prevScanRef = useRef(null)
+  if (securityFindings !== prevScanRef.current) {
+    prevScanRef.current = securityFindings
+    if (securityFindings.length > 0) setTimeout(() => setActiveTab('security'), 150)
+  }
+
   const agentMessages = messages.filter(m => m.type === 'agent_message')
 
   function countFor(tabId) {
     if (tabId === 'analysis')     return results.analysis?.all_findings?.length ?? null
     if (tabId === 'optimization') return results.optimization?.transformations?.length ?? null
     if (tabId === 'verification') return results.verification ? 1 : null
+    if (tabId === 'security') {
+      const n = results.security?.all_vulnerabilities?.length ?? securityFindings.length
+      return n > 0 ? n : null
+    }
     if (tabId === 'messages')     return agentMessages.length > 0 ? agentMessages.length : null
     return null
   }
@@ -570,13 +879,41 @@ export default function ResultsPanel({ results, onAcceptCode, messages = [] }) {
             </button>
           )
         })}
+
+        {/* Global Fix All — only after an explicit scan or pipeline run has produced results */}
+        {onFixAllLocal && (securityFindings.length > 0 || results.analysis !== null) && allErrors.some(e => e.fixable !== false && !fixedErrors.has(`${e.type}:${e.line}`)) && (
+          <button
+            onClick={onFixAllLocal}
+            style={{
+              marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6,
+              padding: '4px 12px', borderRadius: 'var(--radius-sm)',
+              border: 'none', background: 'var(--primary)', color: 'white',
+              fontSize: 11, fontWeight: 700, cursor: 'pointer',
+              fontFamily: 'inherit', boxShadow: '0 2px 6px rgba(37,99,235,0.35)',
+              flexShrink: 0,
+            }}
+            title="Apply all rule-based fixes at once"
+          >
+            <Wrench size={11} strokeWidth={2.5} />
+            Fix All Errors ({allErrors.filter(e => e.fixable !== false && !fixedErrors.has(`${e.type}:${e.line}`)).length})
+          </button>
+        )}
       </div>
 
       {!collapsed && (
         <div className="results-content">
-          {activeTab === 'analysis'     && <AnalysisTab     data={results.analysis} />}
+          {activeTab === 'analysis'     && <AnalysisTab     data={results.analysis} onFixError={onFixError} fixedErrors={fixedErrors} />}
           {activeTab === 'optimization' && <OptimizationTab data={results.optimization} onAcceptCode={onAcceptCode} />}
           {activeTab === 'verification' && <VerificationTab data={results.verification} />}
+          {activeTab === 'security'     && (() => {
+            const secData = results.security ?? (securityFindings.length > 0
+              ? { all_vulnerabilities: securityFindings, new_vulnerabilities: [], overall_risk: computeRisk(securityFindings), status: 'SCANNED' }
+              : null)
+            const fixableCount = (secData?.all_vulnerabilities ?? [])
+              .filter(v => v.fixable !== false && (v.line_number ?? v.line)).length
+            return <SecurityTab data={secData} onFixAll={onFixAll} fixableCount={fixableCount}
+              onFixError={onFixError} fixedErrors={fixedErrors} />
+          })()}
           {activeTab === 'messages'     && <MessagesTab     messages={agentMessages} />}
         </div>
       )}

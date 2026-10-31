@@ -1,0 +1,15 @@
+tc,transformations,original_ms,optimized_ms,speedup_pct,error,below_noise_floor
+TC01,initialize_variable,0.0406,0.0391,3.69,,True
+TC02,initialize_variable,0.0,0.0419,n/a,,True
+TC04,initialize_variable,0.0331,0.0325,1.81,,True
+TC05,initialize_variable;initialize_variable,0.0399,0.0392,1.75,,True
+TC11,off_by_one_fix;strength_reduction;prefer_preincrement,0.0001,0.0,n/a,,True
+TC14,prefer_preincrement,0.0386,0.0387,-0.26,,True
+TC17,prefer_preincrement,0.0005,0.0005,0.0,,True
+TC20,prefer_preincrement,0.0703,0.0774,-10.1,,True
+TC35,remove_dead_code,0.039,0.0376,3.59,,True
+TC50,prefer_preincrement,0.0485,0.0482,0.62,,True
+TC53,prefer_preincrement,0.0,0.0,n/a,Original compilation failed.,True
+TC56,initialize_variable;fix_type_mismatch;hoist_loop_invariant;hoist_loop_invariant;hoist_loop_invariant;remove_empty_if;remove_empty_else;remove_dead_code;fix_memory_leak;prefer_preincrement,0.0,0.0,n/a,Original compilation failed.,True
+TC57,prefer_preincrement,0.0089,0.0083,6.74,,True
+TestCase1,initialize_variable,0.0,0.0,n/a,,True

@@ -1,5 +1,5 @@
 """
-app.py — Flask REST + Server-Sent Events backend for Compiler Optimization UI
+app.py — Flask REST + Server-Sent Events backend for DeepCompile
 ==============================================================================
 Run with:  python app.py
 Then open: http://localhost:5173  (after running `npm run dev` in frontend/)
@@ -23,10 +23,15 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
-from flask import Flask, Response, jsonify, request
+from flask import Flask, Response, jsonify, request, send_from_directory
 from flask_cors import CORS
+from src.sustainability import estimate_run_footprint
+from src.sustainability.hardware_monitor import get_monitor
+from src.sustainability.benchmarks import get_benchmarks
+from src.temp_paths import runtime_temp_dir
 
-app = Flask(__name__)
+DIST_DIR = os.path.join(ROOT, "frontend", "dist")
+app = Flask(__name__, static_folder=DIST_DIR, static_url_path="")
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -135,33 +140,127 @@ def _make_llm(use_llm: bool, backend: str = "ollama"):
 # Mode runners (each runs in a background thread)
 # ────────────────────────────────────────────────────────────────────────────
 
-def _run_full_pipeline(sq: StreamQueue, file_path: str, use_llm: bool) -> None:
-    from src.pipeline.pipeline import CompilerOptimizationPipeline
+def _run_full_pipeline(sq: StreamQueue, file_path: str, use_llm: bool, backend: str = "ollama", hardware_metrics: Dict[str, Any] = None) -> None:
+    from src.agents.analysis_agent import AnalysisAgent
+    from src.agents.optimization_agent import OptimizationAgent
+    from src.agents.verification_agent import VerificationAgent
+    from src.agents.security_agent import SecurityAgent
+    from agent_framework import ContextManager
 
-    sq.push("status", {"phase": "pipeline_init", "message": "Initialising full 3-agent pipeline…"})
-    msg_logger = _QueueMessageLogger(sq)
-    llm        = _make_llm(use_llm)
-    pipeline   = CompilerOptimizationPipeline(llm_client=llm, message_logger=msg_logger)
+    sq.push("status", {"phase": "pipeline_init", "message": "Initialising 4-agent pipeline…"})
+    llm = _make_llm(use_llm, backend)
+    ctx = ContextManager()
 
-    sq.push("status", {"phase": "running", "message": "Running: Analysis → Optimization → Verification"})
-    result = pipeline.run(file_path)
+    # Read source from temp file
+    try:
+        with open(file_path, "r", encoding="utf-8", errors="replace") as fh:
+            source_code = fh.read()
+    except OSError as exc:
+        sq.push("error", {"message": f"Cannot read temp file: {exc}"})
+        return
 
-    sq.push("analysis_result",     result.analysis_report)
-    sq.push("optimization_result", result.optimization_report)
-    sq.push("verification_result", result.verification_report)
+    # ── Step 1: Analysis ──────────────────────────────────────────────────────
+    sq.push("status", {"phase": "analysis_running", "message": "Step 1/4 — Analysis Agent running…"})
+    analysis_result = AnalysisAgent("analysis_1", ctx, llm).process(
+        {"source_code": source_code, "file_path": file_path}
+    )
+    sq.push("analysis_result", analysis_result)
+    n_findings = len(analysis_result.get("all_findings", []))
+    sq.push("status", {
+        "phase":   "analysis_done",
+        "message": f"Analysis complete — {n_findings} finding(s) found",
+    })
+
+    # ── Step 2: Optimization ──────────────────────────────────────────────────
+    sq.push("status", {"phase": "optimization_running", "message": "Step 2/4 — Optimization Agent running…"})
+    opt_result = OptimizationAgent("optimization_1", ctx, llm).process({
+        "source_code":     source_code,
+        "file_path":       file_path,
+        "analysis_report": analysis_result,
+    })
+    sq.push("optimization_result", opt_result)
+    n_transforms = len(opt_result.get("transformations", []))
+    sq.push("status", {
+        "phase":   "optimization_done",
+        "message": f"Optimization complete — {n_transforms} transformation(s) applied",
+    })
+
+    # ── Step 3: Verification ──────────────────────────────────────────────────
+    sq.push("status", {"phase": "verification_running", "message": "Step 3/4 — Verification Agent running…"})
+    ver_result = VerificationAgent("verification_1", ctx, llm).process({
+        "original_code":  source_code,
+        "optimized_code": opt_result.get("optimized_code", source_code),
+        "file_path":      file_path,
+    })
+    sq.push("verification_result", ver_result)
+    ver_status = ver_result.get("status", "UNKNOWN")
+    sq.push("status", {
+        "phase":   "verification_done",
+        "message": f"Verification complete — {ver_status}",
+    })
+
+    # ── Step 4: Security ──────────────────────────────────────────────────────
+    sq.push("status", {"phase": "security_running", "message": "Step 4/4 — Security Agent running…"})
+    # Use original code if verification rolled back the optimization
+    final_code = (
+        opt_result.get("optimized_code", source_code)
+        if ver_status not in ("ROLLBACK", "FAIL")
+        else source_code
+    )
+    sec_result = SecurityAgent("security_1", ctx, llm).process({
+        "original_code":  source_code,
+        "optimized_code": final_code,
+        "file_path":      file_path,
+    })
+    # Push scanner-level findings for editor glyph decorations
+    from src.security.security_scanner import SecurityScanner
+    sq.push("security_findings", {"findings": SecurityScanner().scan(final_code)})
+    sq.push("security_result", sec_result)
+    n_vulns = len(sec_result.get("all_vulnerabilities", []))
+    n_new   = len(sec_result.get("new_vulnerabilities", []))
+    sq.push("status", {
+        "phase":   "security_done",
+        "message": f"Security audit complete — {n_vulns} finding(s), {n_new} new",
+    })
+
+    # ── Pipeline summary ──────────────────────────────────────────────────────
+    if ver_status in ("ROLLBACK", "FAIL") or sec_result.get("status") == "ROLLBACK":
+        overall = "rollback"
+    else:
+        overall = "success"
+
     sq.push("pipeline_result", {
-        "status": result.status,
-        "error":  result.error,
-        "summary": result.summary(),
+        "status":              overall,
+        "analysis_findings":   n_findings,
+        "transformations":     n_transforms,
+        "verification_status": ver_status,
+        "security_vulns":      n_vulns,
+        "new_vulns":           n_new,
+        "security_risk":       sec_result.get("overall_risk", "unknown"),
+        "sustainability":      estimate_run_footprint(
+            "pipeline",
+            source_code,
+            {
+                "transformations": opt_result.get("transformations", []),
+                "all_findings": analysis_result.get("all_findings", []),
+                "stage_timings": {
+                    "analysis": analysis_result.get("stage_timings", {}),
+                    "optimization": opt_result.get("stage_timings", {}),
+                    "verification": ver_result.get("stage_timings", {}),
+                    "security": sec_result.get("stage_timings", {}),
+                },
+            },
+            use_llm=use_llm,
+        ),
     })
 
 
-def _run_analyze_only(sq: StreamQueue, source_code: str, file_path: str, use_llm: bool) -> None:
+def _run_analyze_only(sq: StreamQueue, source_code: str, file_path: str, use_llm: bool, backend: str = "ollama", hardware_metrics: Dict[str, Any] = None) -> None:
     from src.agents.analysis_agent import AnalysisAgent
     from agent_framework import ContextManager
 
     sq.push("status", {"phase": "analysis_init", "message": "Initialising Analysis Agent…"})
-    llm   = _make_llm(use_llm)
+    llm   = _make_llm(use_llm, backend)
     ctx   = ContextManager()
     agent = AnalysisAgent("analysis_1", ctx, llm)
 
@@ -174,12 +273,12 @@ def _run_analyze_only(sq: StreamQueue, source_code: str, file_path: str, use_llm
     })
 
 
-def _run_optimize_only(sq: StreamQueue, source_code: str, file_path: str, use_llm: bool) -> None:
+def _run_optimize_only(sq: StreamQueue, source_code: str, file_path: str, use_llm: bool, backend: str = "ollama", hardware_metrics: Dict[str, Any] = None) -> None:
     from src.agents.analysis_agent import AnalysisAgent
     from src.agents.optimization_agent import OptimizationAgent
     from agent_framework import ContextManager
 
-    llm = _make_llm(use_llm)
+    llm = _make_llm(use_llm, backend)
     ctx = ContextManager()
 
     sq.push("status", {"phase": "analysis_running", "message": "Step 1/2 — Running analysis…"})
@@ -198,6 +297,10 @@ def _run_optimize_only(sq: StreamQueue, source_code: str, file_path: str, use_ll
         "file_path":       file_path,
         "analysis_report": analysis_result,
     })
+    opt_result = dict(opt_result)
+    opt_result["sustainability"] = estimate_run_footprint(
+        "optimize", source_code, opt_result, use_llm=use_llm, hardware_metrics=hardware_metrics
+    )
     sq.push("optimization_result", opt_result)
     sq.push("status", {
         "phase":   "optimization_done",
@@ -205,13 +308,13 @@ def _run_optimize_only(sq: StreamQueue, source_code: str, file_path: str, use_ll
     })
 
 
-def _run_verify_only(sq: StreamQueue, source_code: str, file_path: str, use_llm: bool) -> None:
+def _run_verify_only(sq: StreamQueue, source_code: str, file_path: str, use_llm: bool, backend: str = "ollama", hardware_metrics: Dict[str, Any] = None) -> None:
     from src.agents.analysis_agent import AnalysisAgent
     from src.agents.optimization_agent import OptimizationAgent
     from src.agents.verification_agent import VerificationAgent
     from agent_framework import ContextManager
 
-    llm = _make_llm(use_llm)
+    llm = _make_llm(use_llm, backend)
     ctx = ContextManager()
 
     sq.push("status", {"phase": "analysis_running", "message": "Step 1/3 — Running analysis…"})
@@ -237,10 +340,60 @@ def _run_verify_only(sq: StreamQueue, source_code: str, file_path: str, use_llm:
         "optimized_code": opt_result.get("optimized_code", source_code),
         "file_path":      file_path,
     })
+    ver_result = dict(ver_result)
+    ver_result["sustainability"] = estimate_run_footprint(
+        "verify", source_code, ver_result, use_llm=use_llm, hardware_metrics=hardware_metrics
+    )
     sq.push("verification_result", ver_result)
     sq.push("status", {
         "phase":   "verification_done",
         "message": f"Verification complete — status: {ver_result.get('status', 'UNKNOWN')}",
+    })
+
+
+def _run_security_only(sq: StreamQueue, source_code: str, file_path: str, use_llm: bool, backend: str = "ollama", hardware_metrics: Dict[str, Any] = None) -> None:
+    from src.security.security_scanner import SecurityScanner
+    from src.agents.security_agent import SecurityAgent
+    from agent_framework import ContextManager
+
+    sq.push("status", {"phase": "security_init", "message": "Initialising Security Scanner…"})
+    findings = SecurityScanner().scan(source_code)
+    # Push findings for editor glyph decorations
+    sq.push("security_findings", {"findings": findings})
+    sq.push("status", {
+        "phase":   "security_scan_done",
+        "message": f"Rule-based scan complete — {len(findings)} finding(s).",
+    })
+
+    sq.push("status", {"phase": "security_agent_running", "message": "Running Security Agent (deep audit)…"})
+    llm = _make_llm(use_llm, backend)
+    ctx = ContextManager()
+    try:
+        sec_result = SecurityAgent("security_1", ctx, llm).process({
+            "original_code":  source_code,
+            "optimized_code": source_code,
+            "file_path":      file_path,
+        })
+    except Exception as exc:
+        import traceback
+        sq.push("error", {"message": f"Security Agent error: {exc}", "traceback": traceback.format_exc()})
+        sec_result = {
+            "all_vulnerabilities": findings,
+            "new_vulnerabilities": [],
+            "overall_risk": "unknown" if not findings else ("high" if any(f.get("severity") == "high" for f in findings) else "medium"),
+            "status": "PASS" if not findings else "WARN",
+            "summary": f"Deep audit failed ({exc}); showing rule-based findings only.",
+        }
+    # For a standalone scan original == optimized, so new_vulns is always empty
+    # and status is always PASS — override to WARN when findings actually exist.
+    if sec_result.get("status") == "PASS" and sec_result.get("all_vulnerabilities"):
+        sec_result = dict(sec_result)
+        sec_result["status"] = "WARN"
+
+    sq.push("security_result", sec_result)
+    sq.push("status", {
+        "phase":   "security_done",
+        "message": f"Security audit complete — {len(sec_result.get('all_vulnerabilities', []))} finding(s).",
     })
 
 
@@ -249,7 +402,7 @@ def _run_verify_only(sq: StreamQueue, source_code: str, file_path: str, use_llm:
 # ────────────────────────────────────────────────────────────────────────────
 
 def _worker(sq: StreamQueue, source_code: str, mode: str,
-            use_llm: bool, language: str, backend: str = "ollama") -> None:
+            use_llm: bool, language: str, backend: str = "ollama", hardware_metrics: Dict[str, Any] = None) -> None:
     """Runs the requested pipeline mode; pushes all events into sq."""
 
     # Attach a log handler so Python loggers stream to the UI
@@ -261,6 +414,8 @@ def _worker(sq: StreamQueue, source_code: str, mode: str,
         logging.getLogger("src.agents.analysis_agent"),
         logging.getLogger("src.agents.optimization_agent"),
         logging.getLogger("src.agents.verification_agent"),
+        logging.getLogger("src.agents.security_agent"),
+        logging.getLogger("src.security.security_scanner"),
         logging.getLogger("src.llm.llm_client"),
         logging.getLogger("src.verification.diff_tester"),
         logging.getLogger("src.verification.perf_benchmarker"),
@@ -271,6 +426,9 @@ def _worker(sq: StreamQueue, source_code: str, mode: str,
 
     tmp_path: Optional[str] = None
     try:
+        monitor = get_monitor()
+        monitor.start()
+
         ext_map = {
             "cpp": ".cpp", "c": ".c",
             "python": ".py", "java": ".java", "go": ".go",
@@ -278,7 +436,7 @@ def _worker(sq: StreamQueue, source_code: str, mode: str,
         ext = ext_map.get(language, ".cpp")
 
         with tempfile.NamedTemporaryFile(
-            mode="w", suffix=ext, delete=False, encoding="utf-8", prefix="ui_"
+            mode="w", suffix=ext, delete=False, encoding="utf-8", prefix="ui_", dir=runtime_temp_dir()
         ) as fh:
             fh.write(source_code)
             tmp_path = fh.name
@@ -286,8 +444,9 @@ def _worker(sq: StreamQueue, source_code: str, mode: str,
         sq.push("status", {"phase": "init", "message": "Code written to temp file — starting…"})
 
         # Pre-warm: send a tiny ping to Ollama so the model is loaded
-        # before the real pipeline request hits (avoids cold-start timeout)
-        if use_llm:
+        # before the real pipeline request hits (avoids cold-start timeout).
+        # Skip for Gemini — it's a cloud API with no cold-start penalty.
+        if use_llm and backend == "ollama":
             try:
                 from src.llm.llm_client import LLMClient
                 _warm = LLMClient()
@@ -299,13 +458,15 @@ def _worker(sq: StreamQueue, source_code: str, mode: str,
                 pass
 
         if mode == "pipeline":
-            _run_full_pipeline(sq, tmp_path, use_llm)
+            _run_full_pipeline_orchestrated(sq, tmp_path, use_llm, backend, hardware_metrics=hardware_metrics)
         elif mode == "analyze":
-            _run_analyze_only(sq, source_code, tmp_path, use_llm)
+            _run_analyze_only(sq, source_code, tmp_path, use_llm, backend, hardware_metrics=hardware_metrics)
         elif mode == "optimize":
-            _run_optimize_only(sq, source_code, tmp_path, use_llm)
+            _run_optimize_only(sq, source_code, tmp_path, use_llm, backend, hardware_metrics=hardware_metrics)
         elif mode == "verify":
-            _run_verify_only(sq, source_code, tmp_path, use_llm)
+            _run_verify_only(sq, source_code, tmp_path, use_llm, backend, hardware_metrics=hardware_metrics)
+        elif mode == "security":
+            _run_security_only(sq, source_code, tmp_path, use_llm, backend, hardware_metrics=hardware_metrics)
         else:
             sq.push("error", {"message": f"Unknown mode: {mode}"})
 
@@ -320,6 +481,13 @@ def _worker(sq: StreamQueue, source_code: str, mode: str,
         sq.push("complete", {"status": "error"})
 
     finally:
+        hardware_metrics = monitor.stop() if 'monitor' in locals() else {}
+
+        if mode == "pipeline":
+             # We need a way to pass this to the orchestrated runner if we want it there
+             # For now, let's update the individual mode runners logic
+             pass
+        
         for _lg in _watched_loggers:
             _lg.removeHandler(handler)
         if tmp_path:
@@ -333,6 +501,148 @@ def _worker(sq: StreamQueue, source_code: str, mode: str,
 # ────────────────────────────────────────────────────────────────────────────
 # Flask routes
 # ────────────────────────────────────────────────────────────────────────────
+
+def _run_full_pipeline_orchestrated(
+    sq: StreamQueue,
+    file_path: str,
+    use_llm: bool,
+    backend: str = "ollama",
+    hardware_metrics: Dict[str, Any] = None,
+) -> None:
+    from src.pipeline.pipeline import CompilerOptimizationPipeline, PipelineResult
+    from src.reporting.report_contract import build_explainability_report
+    from src.security.security_scanner import SecurityScanner
+
+    sq.push("status", {"phase": "pipeline_init", "message": "Initialising orchestrated pipelineâ€¦"})
+    llm = _make_llm(use_llm, backend)
+    pipeline = CompilerOptimizationPipeline(llm_client=llm, message_logger=_QueueMessageLogger(sq))
+
+    if not use_llm:
+        for agent in (
+            pipeline.analysis_agent,
+            pipeline.optimization_agent,
+            pipeline.verification_agent,
+            pipeline.security_agent,
+        ):
+            if agent is not None:
+                agent.llm._available = False
+
+    orchestration = pipeline.run_orchestrated(file_path, max_cycles=3, low_conf_threshold=0.8)
+    payload = orchestration.get("pipeline_result", {})
+    result = PipelineResult(
+        file_path=payload.get("file_path", file_path),
+        status=payload.get("status", "failed"),
+        analysis_report=payload.get("analysis_report", {}),
+        optimization_report=payload.get("optimization_report", {}),
+        verification_report=payload.get("verification_report", {}),
+        security_report=payload.get("security_report", {}),
+        error=payload.get("error"),
+    )
+
+    analysis_result = result.analysis_report or {}
+    try:
+        with open(file_path, "r", encoding="utf-8", errors="replace") as fh:
+            source_code = fh.read()
+    except OSError:
+        source_code = ""
+
+    opt_result = dict(result.optimization_report or {})
+    ver_result = dict(result.verification_report or {})
+    sec_result = result.security_report or {}
+
+    opt_result["sustainability"] = estimate_run_footprint(
+        "optimize", source_code, opt_result, use_llm=use_llm, hardware_metrics=hardware_metrics
+    )
+    ver_result["sustainability"] = estimate_run_footprint(
+        "verify", source_code, ver_result, use_llm=use_llm, hardware_metrics=hardware_metrics
+    )
+
+    sq.push("analysis_result", analysis_result)
+    sq.push("optimization_result", opt_result)
+    sq.push("verification_result", ver_result)
+    sq.push("security_result", sec_result)
+
+    final_code = opt_result.get("optimized_code", "")
+    if ver_result.get("status") in ("ROLLBACK", "FAIL") or sec_result.get("status") == "ROLLBACK":
+        try:
+            with open(file_path, "r", encoding="utf-8", errors="replace") as fh:
+                final_code = fh.read()
+        except OSError:
+            pass
+
+    sq.push("security_findings", {"findings": SecurityScanner().scan(final_code)})
+    explainability = build_explainability_report(file_path, result, orchestration)
+
+    sq.push("status", {
+        "phase": "orchestration_done",
+        "message": (
+            f"Workflow {orchestration.get('workflow_status', 'UNKNOWN')} "
+            f"after {orchestration.get('iteration_count', 0)} iteration(s)"
+        ),
+    })
+
+    sq.push("pipeline_result", {
+        "status":              result.status,
+        "analysis_findings":   len(analysis_result.get("all_findings", [])),
+        "transformations":     len(opt_result.get("transformations", [])),
+        "verification_status": ver_result.get("status", "UNKNOWN"),
+        "security_vulns":      len(sec_result.get("all_vulnerabilities", [])),
+        "new_vulns":           len(sec_result.get("new_vulnerabilities", [])),
+        "security_risk":       sec_result.get("overall_risk", "unknown"),
+        "workflow_status":     orchestration.get("workflow_status", "UNKNOWN"),
+        "iteration_count":     orchestration.get("iteration_count", 0),
+        "stop_reason":         orchestration.get("stop_reason", ""),
+        "review_required":     orchestration.get("review_required", False),
+        "escalation_reasons":  orchestration.get("escalation_reasons", []),
+        "explainability":      explainability.to_dict(),
+        "sustainability":      estimate_run_footprint(
+            "pipeline",
+            source_code,
+            {
+                "transformations": opt_result.get("transformations", []),
+                "all_findings": analysis_result.get("all_findings", []),
+                "stage_timings": {
+                    "analysis": analysis_result.get("stage_timings", {}),
+                    "optimization": opt_result.get("stage_timings", {}),
+                    "verification": ver_result.get("stage_timings", {}),
+                    "security": sec_result.get("stage_timings", {}),
+                },
+            },
+            use_llm=use_llm,
+            hardware_metrics=hardware_metrics,
+        ),
+    })
+
+
+@app.route("/api/security-scan", methods=["POST"])
+def security_scan():
+    """On-demand rule-based security scan — synchronous, < 100 ms."""
+    body = request.get_json(silent=True) or {}
+    code = body.get("code", "").strip()
+    if not code:
+        return jsonify({"error": "No code provided"}), 400
+
+    import time
+    from src.security.security_scanner import SecurityScanner
+    t0       = time.monotonic()
+    findings = SecurityScanner().scan(code)
+    elapsed  = int((time.monotonic() - t0) * 1000)
+    return jsonify({"findings": findings, "total": len(findings), "scan_time_ms": elapsed})
+
+
+@app.route("/api/security-fix", methods=["POST"])
+def security_fix():
+    """Apply all rule-based fixes and return fixed code + unified diff."""
+    body     = request.get_json(silent=True) or {}
+    code     = body.get("code", "").strip()
+    findings = body.get("findings", [])
+    if not code:
+        return jsonify({"error": "No code provided"}), 400
+
+    from src.security.security_fixer import SecurityFixer
+    fixed_code, fixes_applied, diff = SecurityFixer().apply_all_fixes(code, findings)
+    return jsonify({"fixed_code": fixed_code, "unified_diff": diff, "fixes_applied": fixes_applied})
+
 
 @app.route("/api/health", methods=["GET"])
 def health():
@@ -388,6 +698,23 @@ def stream_endpoint():
             "Connection":        "keep-alive",
         },
     )
+
+
+# ────────────────────────────────────────────────────────────────────────────
+# Serve React frontend (catch-all for client-side routing)
+# ────────────────────────────────────────────────────────────────────────────
+
+@app.route("/api/sustainability-benchmarks", methods=["GET"])
+def sustainability_benchmarks():
+    return jsonify(get_benchmarks())
+
+
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
+def serve_react(path: str):
+    if os.path.exists(os.path.join(DIST_DIR, path)):
+        return send_from_directory(DIST_DIR, path)
+    return send_from_directory(DIST_DIR, "index.html")
 
 
 # ────────────────────────────────────────────────────────────────────────────

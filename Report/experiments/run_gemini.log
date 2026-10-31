@@ -1,0 +1,46 @@
+TC01 gemini_orch 36.0s
+TC07 gemini_orch 15.4s
+TC12 gemini_orch 17.3s
+TC14 gemini_orch 35.3s
+TC15 gemini_orch 9.3s
+TC16 gemini_orch 9.1s
+TC17 gemini_orch 35.3s
+TC22 gemini_orch 14.1s
+TC23 gemini_orch 7.9s
+TC27 gemini_orch 19.1s
+TC32 gemini_orch 8.8s
+TC34 gemini_orch 8.9s
+TC35 gemini_orch 9.2s
+TC36 gemini_orch 7.8s
+TC44 gemini_orch 8.5s
+TC48 gemini_orch 8.0s
+TC49 gemini_orch 10.4s
+TC51 gemini_orch 9.8s
+TC52 gemini_orch 9.2s
+TC53 gemini_orch 7.2s
+TC54 gemini_orch 6.9s
+TC55 gemini_orch 9.4s
+TC56 gemini_orch 8.9s
+TC57 gemini_orch 10.3s
+{
+  "headline_cases": 22,
+  "detected_overall": 12,
+  "detection_rate_overall": 0.5454545454545454,
+  "supported_cases": 16,
+  "detection_rate_within_coverage": 0.6875,
+  "multi_rule_recall": 0.9,
+  "corrected_detector_judged": 3,
+  "corrected_denominator": 12,
+  "ver_status_counts": {
+    "PASS": 23,
+    "ROLLBACK": 1
+  },
+  "errors": [],
+  "rows_total": 24,
+  "output_matches_sol": 3,
+  "output_sol_checked": 12,
+  "fp_on_sol": 0,
+  "fp_denominator": 0,
+  "llm_fallback": 23
+}
+GEMINI_DONE

@@ -1,0 +1,48 @@
+{
+  "tc": "TC14",
+  "config": "gemini_orch",
+  "expected": [
+    "leak"
+  ],
+  "headline": true,
+  "supported": true,
+  "nondeterministic": false,
+  "detected": {
+    "leak": true
+  },
+  "n_findings": 4,
+  "detect_s": 9.312,
+  "workflow_status": "PASS",
+  "iterations": 0,
+  "stop_reason": "initial_pass",
+  "pipeline_status": "success",
+  "pipeline_s": 18.715,
+  "ver_status": "PASS",
+  "sec_status": "PASS",
+  "diff_passed": true,
+  "transformations": [
+    "prefer_preincrement"
+  ],
+  "stage_timings": {
+    "analysis": {
+      "parse_s": 0.0006,
+      "rule_s": 0.0031,
+      "llm_s": 4.1298
+    },
+    "optimization": {
+      "rule_s": 0.0008,
+      "llm_s": 6.6845
+    },
+    "verification": {
+      "parallel_checks_s": 2.376,
+      "llm_s": 5.3191
+    },
+    "security": {
+      "total_s": 4.2458
+    }
+  },
+  "llm_fallback": true,
+  "code_changed": true,
+  "corrected_detector": true,
+  "output_matches_sol": true
+}

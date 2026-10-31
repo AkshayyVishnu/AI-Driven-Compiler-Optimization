@@ -1,0 +1,231 @@
+{"kind":"deck","id":"deepcompile-final","slideCount":8,"slideSize":{"width":1280,"height":720}}
+{"kind":"slide","slide":1,"id":"4mumr3"}
+{"kind":"slide","slide":2,"id":"1kcf8g"}
+{"kind":"slide","slide":3,"id":"x7tqes"}
+{"kind":"slide","slide":4,"id":"ibocnc"}
+{"kind":"slide","slide":5,"id":"kazkci"}
+{"kind":"slide","slide":6,"id":"svkkc9"}
+{"kind":"slide","slide":7,"id":"et63cv"}
+{"kind":"slide","slide":8,"id":"oi57rt"}
+{"kind":"image","slide":1,"id":"2","role":"fallback art plate","path":"fallback-data-url","bbox":[0,0,1280,720]}
+{"kind":"shape","slide":1,"id":"3","role":"cover contrast overlay","shapeType":"rect","bbox":[0,0,1280,720]}
+{"kind":"shape","slide":1,"id":"4","role":"cover accent rule","shapeType":"rect","bbox":[64,86,7,455]}
+{"kind":"textbox","slide":1,"id":"5","role":"kicker","text":"DEEPCOMPILE FINAL","textPreview":"DEEPCOMPILE FINAL","textChars":17,"textLines":1,"bbox":[86,88,520,26]}
+{"kind":"textbox","slide":1,"id":"6","role":"cover title","text":"Safe Source-to-Source Optimization for C and C++","textPreview":"Safe Source-to-Source Optimization for C and C++","textChars":48,"textLines":1,"bbox":[82,130,785,184]}
+{"kind":"textbox","slide":1,"id":"7","role":"cover subtitle","text":"A deterministic multi-agent workflow for analysis, optimization, verification, security review, and bounded refinement.","textPreview":"A deterministic multi-agent workflow for analysis, optimization, verification, security review, and bounded refinement.","textChars":119,"textLines":1,"bbox":[86,326,610,86]}
+{"kind":"shape","slide":1,"id":"8","role":"cover moment panel","shapeType":"roundRect","bbox":[86,456,390,92]}
+{"kind":"textbox","slide":1,"id":"9","role":"cover moment","text":"Revised scope: source-to-source only, deterministic no-LLM evidence path","textPreview":"Revised scope: source-to-source only, deterministic no-LLM evidence path","textChars":72,"textLines":1,"bbox":[112,478,336,40]}
+{"kind":"textbox","slide":1,"id":"10","role":"caption","text":"All meaningful copy, layout, and speaker notes are authored as editable PowerPoint objects.","textPreview":"All meaningful copy, layout, and speaker notes are authored as editable PowerPoint objects.","textChars":91,"textLines":1,"bbox":[64,674,980,22]}
+{"kind":"image","slide":2,"id":"2","role":"fallback art plate","path":"fallback-data-url","bbox":[0,0,1280,720]}
+{"kind":"shape","slide":2,"id":"3","role":"content contrast overlay","shapeType":"rect","bbox":[0,0,1280,720]}
+{"kind":"textbox","slide":2,"id":"4","role":"header","text":"PROJECT SCOPE","textPreview":"PROJECT SCOPE","textChars":13,"textLines":1,"bbox":[64,34,430,24]}
+{"kind":"textbox","slide":2,"id":"5","role":"header","text":"02 / 08","textPreview":"02 / 08","textChars":7,"textLines":1,"bbox":[1114,34,104,24]}
+{"kind":"shape","slide":2,"id":"6","role":"header rule","shapeType":"rect","bbox":[64,64,1152,2]}
+{"kind":"shape","slide":2,"id":"7","role":"header marker","shapeType":"ellipse","bbox":[57,57,16,16]}
+{"kind":"textbox","slide":2,"id":"8","role":"title","text":"What the final submission includes","textPreview":"What the final submission includes","textChars":34,"textLines":1,"bbox":[64,86,760,142]}
+{"kind":"textbox","slide":2,"id":"9","role":"subtitle","text":"The formal submission path was narrowed to maximize reproducibility and defensibility.","textPreview":"The formal submission path was narrowed to maximize reproducibility and defensibility.","textChars":86,"textLines":1,"bbox":[66,234,720,70]}
+{"kind":"shape","slide":2,"id":"10","role":"card panel: Source-to-source","shapeType":"roundRect","bbox":[84,352,355.3333333333333,240]}
+{"kind":"shape","slide":2,"id":"11","role":"card accent: Source-to-source","shapeType":"rect","bbox":[84,352,8,240]}
+{"kind":"shape","slide":2,"id":"12","role":"icon badge","shapeType":"ellipse","bbox":[106,376,54,54]}
+{"kind":"shape","slide":2,"id":"13","role":"icon glyph","shapeType":"rect","bbox":[122,405,6,12]}
+{"kind":"shape","slide":2,"id":"14","role":"icon glyph","shapeType":"rect","bbox":[131,397,6,20]}
+{"kind":"shape","slide":2,"id":"15","role":"icon glyph","shapeType":"rect","bbox":[140,390,6,27]}
+{"kind":"textbox","slide":2,"id":"16","role":"card label","text":"Source-to-source","textPreview":"Source-to-source","textChars":16,"textLines":1,"bbox":[172,374,247.33333333333331,28]}
+{"kind":"textbox","slide":2,"id":"17","role":"card body: Source-to-source","text":"The final system accepts C\nor C++ source and emits\nimproved source code plus\nexplainability artifacts.\nCompiler integration is\nintentionally out of scope.","textPreview":"The final system accepts C | or C++ source and emits | improved source code plus | explainability artifacts. | Compiler integration is | intentionally out of scope.","textChars":154,"textLines":6,"bbox":[108,438,307.3333333333333,132]}
+{"kind":"shape","slide":2,"id":"18","role":"card panel: Deterministic evidence","shapeType":"roundRect","bbox":[463.3333333333333,352,355.3333333333333,240]}
+{"kind":"shape","slide":2,"id":"19","role":"card accent: Deterministic evidence","shapeType":"rect","bbox":[463.3333333333333,352,8,240]}
+{"kind":"shape","slide":2,"id":"20","role":"icon badge","shapeType":"ellipse","bbox":[485.3333333333333,376,54,54]}
+{"kind":"shape","slide":2,"id":"21","role":"icon glyph","shapeType":"ellipse","bbox":[498.3333333333333,394,10,10]}
+{"kind":"shape","slide":2,"id":"22","role":"icon glyph","shapeType":"ellipse","bbox":[516.3333333333333,403,10,10]}
+{"kind":"shape","slide":2,"id":"23","role":"icon glyph","shapeType":"rect","bbox":[507.3333333333333,401,19,3]}
+{"kind":"textbox","slide":2,"id":"24","role":"card label","text":"Deterministic evidence","textPreview":"Deterministic evidence","textChars":22,"textLines":1,"bbox":[551.3333333333333,374,247.33333333333331,28]}
+{"kind":"textbox","slide":2,"id":"25","role":"card body: Deterministic evidence","text":"All formal testing and\nbenchmark results are\nproduced in no-LLM mode so\nthe reports remain\nreproducible and independent\nof external model access.","textPreview":"All formal testing and | benchmark results are | produced in no-LLM mode so | the reports remain | reproducible and independent | of external model access.","textChars":145,"textLines":6,"bbox":[487.3333333333333,438,307.3333333333333,132]}
+{"kind":"shape","slide":2,"id":"26","role":"card panel: Safe acceptance","shapeType":"roundRect","bbox":[842.6666666666666,352,355.3333333333333,240]}
+{"kind":"shape","slide":2,"id":"27","role":"card accent: Safe acceptance","shapeType":"rect","bbox":[842.6666666666666,352,8,240]}
+{"kind":"shape","slide":2,"id":"28","role":"icon badge","shapeType":"ellipse","bbox":[864.6666666666666,376,54,54]}
+{"kind":"shape","slide":2,"id":"29","role":"icon glyph","shapeType":"roundRect","bbox":[877.6666666666666,391,26,13]}
+{"kind":"shape","slide":2,"id":"30","role":"icon glyph","shapeType":"roundRect","bbox":[882.6666666666666,400,26,13]}
+{"kind":"shape","slide":2,"id":"31","role":"icon glyph","shapeType":"roundRect","bbox":[887.6666666666666,409,20,10]}
+{"kind":"textbox","slide":2,"id":"32","role":"card label","text":"Safe acceptance","textPreview":"Safe acceptance","textChars":15,"textLines":1,"bbox":[930.6666666666666,374,247.33333333333331,28]}
+{"kind":"textbox","slide":2,"id":"33","role":"card body: Safe acceptance","text":"Only transformations that\nsurvive verification and\nsecurity review are\naccepted. Ambiguous cases\nare escalated instead of\nbeing forced through.","textPreview":"Only transformations that | survive verification and | security review are | accepted. Ambiguous cases | are escalated instead of | being forced through.","textChars":143,"textLines":6,"bbox":[866.6666666666666,438,307.3333333333333,132]}
+{"kind":"textbox","slide":2,"id":"34","role":"caption","text":"All meaningful copy, layout, and speaker notes are authored as editable PowerPoint objects.","textPreview":"All meaningful copy, layout, and speaker notes are authored as editable PowerPoint objects.","textChars":91,"textLines":1,"bbox":[64,674,980,22]}
+{"kind":"image","slide":3,"id":"2","role":"fallback art plate","path":"fallback-data-url","bbox":[0,0,1280,720]}
+{"kind":"shape","slide":3,"id":"3","role":"content contrast overlay","shapeType":"rect","bbox":[0,0,1280,720]}
+{"kind":"textbox","slide":3,"id":"4","role":"header","text":"SYSTEM ARCHITECTURE","textPreview":"SYSTEM ARCHITECTURE","textChars":19,"textLines":1,"bbox":[64,34,430,24]}
+{"kind":"textbox","slide":3,"id":"5","role":"header","text":"03 / 08","textPreview":"03 / 08","textChars":7,"textLines":1,"bbox":[1114,34,104,24]}
+{"kind":"shape","slide":3,"id":"6","role":"header rule","shapeType":"rect","bbox":[64,64,1152,2]}
+{"kind":"shape","slide":3,"id":"7","role":"header marker","shapeType":"ellipse","bbox":[57,57,16,16]}
+{"kind":"textbox","slide":3,"id":"8","role":"title","text":"Five layers now govern every accepted rewrite","textPreview":"Five layers now govern every accepted rewrite","textChars":45,"textLines":1,"bbox":[64,86,760,142]}
+{"kind":"textbox","slide":3,"id":"9","role":"subtitle","text":"The baseline pipeline is unchanged, but Week 9 onward added orchestration, bounded refinement, shared reporting, and domain-aware behavior.","textPreview":"The baseline pipeline is unchanged, but Week 9 onward added orchestration, bounded refinement, shared reporting, and domain-aware behavior.","textChars":139,"textLines":1,"bbox":[66,234,720,70]}
+{"kind":"shape","slide":3,"id":"10","role":"card panel: Pipeline core","shapeType":"roundRect","bbox":[84,352,355.3333333333333,240]}
+{"kind":"shape","slide":3,"id":"11","role":"card accent: Pipeline core","shapeType":"rect","bbox":[84,352,8,240]}
+{"kind":"shape","slide":3,"id":"12","role":"icon badge","shapeType":"ellipse","bbox":[106,376,54,54]}
+{"kind":"shape","slide":3,"id":"13","role":"icon glyph","shapeType":"rect","bbox":[122,405,6,12]}
+{"kind":"shape","slide":3,"id":"14","role":"icon glyph","shapeType":"rect","bbox":[131,397,6,20]}
+{"kind":"shape","slide":3,"id":"15","role":"icon glyph","shapeType":"rect","bbox":[140,390,6,27]}
+{"kind":"textbox","slide":3,"id":"16","role":"card label","text":"Pipeline core","textPreview":"Pipeline core","textChars":13,"textLines":1,"bbox":[172,374,247.33333333333331,28]}
+{"kind":"textbox","slide":3,"id":"17","role":"card body: Pipeline core","text":"Analysis identifies issues\nand opportunities.\nOptimization applies\nconservative rewrites.\nVerification rejects unsafe\nbehavior. Security blocks\nregressions.","textPreview":"Analysis identifies issues | and opportunities. | Optimization applies | conservative rewrites. | Verification rejects unsafe | behavior. Security blocks | regressions.","textChars":156,"textLines":7,"bbox":[108,438,307.3333333333333,132]}
+{"kind":"shape","slide":3,"id":"18","role":"card panel: Workflow control","shapeType":"roundRect","bbox":[463.3333333333333,352,355.3333333333333,240]}
+{"kind":"shape","slide":3,"id":"19","role":"card accent: Workflow control","shapeType":"rect","bbox":[463.3333333333333,352,8,240]}
+{"kind":"shape","slide":3,"id":"20","role":"icon badge","shapeType":"ellipse","bbox":[485.3333333333333,376,54,54]}
+{"kind":"shape","slide":3,"id":"21","role":"icon glyph","shapeType":"ellipse","bbox":[498.3333333333333,394,10,10]}
+{"kind":"shape","slide":3,"id":"22","role":"icon glyph","shapeType":"ellipse","bbox":[516.3333333333333,403,10,10]}
+{"kind":"shape","slide":3,"id":"23","role":"icon glyph","shapeType":"rect","bbox":[507.3333333333333,401,19,3]}
+{"kind":"textbox","slide":3,"id":"24","role":"card label","text":"Workflow control","textPreview":"Workflow control","textChars":16,"textLines":1,"bbox":[551.3333333333333,374,247.33333333333331,28]}
+{"kind":"textbox","slide":3,"id":"25","role":"card body: Workflow control","text":"The orchestrator evaluates\nthe first result, decides\nwhether refinement is\njustified, and emits a\nworkflow-level verdict such\nas PASS or ESCALATE.","textPreview":"The orchestrator evaluates | the first result, decides | whether refinement is | justified, and emits a | workflow-level verdict such | as PASS or ESCALATE.","textChars":146,"textLines":6,"bbox":[487.3333333333333,438,307.3333333333333,132]}
+{"kind":"shape","slide":3,"id":"26","role":"card panel: Shared evidence","shapeType":"roundRect","bbox":[842.6666666666666,352,355.3333333333333,240]}
+{"kind":"shape","slide":3,"id":"27","role":"card accent: Shared evidence","shapeType":"rect","bbox":[842.6666666666666,352,8,240]}
+{"kind":"shape","slide":3,"id":"28","role":"icon badge","shapeType":"ellipse","bbox":[864.6666666666666,376,54,54]}
+{"kind":"shape","slide":3,"id":"29","role":"icon glyph","shapeType":"roundRect","bbox":[877.6666666666666,391,26,13]}
+{"kind":"shape","slide":3,"id":"30","role":"icon glyph","shapeType":"roundRect","bbox":[882.6666666666666,400,26,13]}
+{"kind":"shape","slide":3,"id":"31","role":"icon glyph","shapeType":"roundRect","bbox":[887.6666666666666,409,20,10]}
+{"kind":"textbox","slide":3,"id":"32","role":"card label","text":"Shared evidence","textPreview":"Shared evidence","textChars":15,"textLines":1,"bbox":[930.6666666666666,374,247.33333333333331,28]}
+{"kind":"textbox","slide":3,"id":"33","role":"card body: Shared evidence","text":"Caching, stage timings,\nunified explainability\nreports, and deterministic\nlogs make the pipeline\nmeasurable across CLI, UI,\nand report exports.","textPreview":"Caching, stage timings, | unified explainability | reports, and deterministic | logs make the pipeline | measurable across CLI, UI, | and report exports.","textChars":143,"textLines":6,"bbox":[866.6666666666666,438,307.3333333333333,132]}
+{"kind":"textbox","slide":3,"id":"34","role":"caption","text":"All meaningful copy, layout, and speaker notes are authored as editable PowerPoint objects.","textPreview":"All meaningful copy, layout, and speaker notes are authored as editable PowerPoint objects.","textChars":91,"textLines":1,"bbox":[64,674,980,22]}
+{"kind":"image","slide":4,"id":"2","role":"fallback art plate","path":"fallback-data-url","bbox":[0,0,1280,720]}
+{"kind":"shape","slide":4,"id":"3","role":"content contrast overlay","shapeType":"rect","bbox":[0,0,1280,720]}
+{"kind":"textbox","slide":4,"id":"4","role":"header","text":"ORCHESTRATION","textPreview":"ORCHESTRATION","textChars":13,"textLines":1,"bbox":[64,34,430,24]}
+{"kind":"textbox","slide":4,"id":"5","role":"header","text":"04 / 08","textPreview":"04 / 08","textChars":7,"textLines":1,"bbox":[1114,34,104,24]}
+{"kind":"shape","slide":4,"id":"6","role":"header rule","shapeType":"rect","bbox":[64,64,1152,2]}
+{"kind":"shape","slide":4,"id":"7","role":"header marker","shapeType":"ellipse","bbox":[57,57,16,16]}
+{"kind":"textbox","slide":4,"id":"8","role":"title","text":"Bounded refinement prevents infinite retries","textPreview":"Bounded refinement prevents infinite retries","textChars":44,"textLines":1,"bbox":[64,86,760,142]}
+{"kind":"textbox","slide":4,"id":"9","role":"subtitle","text":"Week 9 introduced explicit convergence rules, escalation triggers, and conflict-resolution priorities.","textPreview":"Week 9 introduced explicit convergence rules, escalation triggers, and conflict-resolution priorities.","textChars":102,"textLines":1,"bbox":[66,234,720,70]}
+{"kind":"shape","slide":4,"id":"10","role":"card panel: Retry limits","shapeType":"roundRect","bbox":[84,352,355.3333333333333,240]}
+{"kind":"shape","slide":4,"id":"11","role":"card accent: Retry limits","shapeType":"rect","bbox":[84,352,8,240]}
+{"kind":"shape","slide":4,"id":"12","role":"icon badge","shapeType":"ellipse","bbox":[106,376,54,54]}
+{"kind":"shape","slide":4,"id":"13","role":"icon glyph","shapeType":"rect","bbox":[122,405,6,12]}
+{"kind":"shape","slide":4,"id":"14","role":"icon glyph","shapeType":"rect","bbox":[131,397,6,20]}
+{"kind":"shape","slide":4,"id":"15","role":"icon glyph","shapeType":"rect","bbox":[140,390,6,27]}
+{"kind":"textbox","slide":4,"id":"16","role":"card label","text":"Retry limits","textPreview":"Retry limits","textChars":12,"textLines":1,"bbox":[172,374,247.33333333333331,28]}
+{"kind":"textbox","slide":4,"id":"17","role":"card body: Retry limits","text":"Refinement is capped at\nthree cycles and stops early\non repeated diff signatures,\nrollback triggers, or no\nmaterial improvement.","textPreview":"Refinement is capped at | three cycles and stops early | on repeated diff signatures, | rollback triggers, or no | material improvement.","textChars":128,"textLines":5,"bbox":[108,438,307.3333333333333,132]}
+{"kind":"shape","slide":4,"id":"18","role":"card panel: Priority order","shapeType":"roundRect","bbox":[463.3333333333333,352,355.3333333333333,240]}
+{"kind":"shape","slide":4,"id":"19","role":"card accent: Priority order","shapeType":"rect","bbox":[463.3333333333333,352,8,240]}
+{"kind":"shape","slide":4,"id":"20","role":"icon badge","shapeType":"ellipse","bbox":[485.3333333333333,376,54,54]}
+{"kind":"shape","slide":4,"id":"21","role":"icon glyph","shapeType":"ellipse","bbox":[498.3333333333333,394,10,10]}
+{"kind":"shape","slide":4,"id":"22","role":"icon glyph","shapeType":"ellipse","bbox":[516.3333333333333,403,10,10]}
+{"kind":"shape","slide":4,"id":"23","role":"icon glyph","shapeType":"rect","bbox":[507.3333333333333,401,19,3]}
+{"kind":"textbox","slide":4,"id":"24","role":"card label","text":"Priority order","textPreview":"Priority order","textChars":14,"textLines":1,"bbox":[551.3333333333333,374,247.33333333333331,28]}
+{"kind":"textbox","slide":4,"id":"25","role":"card body: Priority order","text":"Verification and security\nveto everything else.\nCorrectness-preserving\noptimization outranks\ncosmetic or\nexplainability-only changes.","textPreview":"Verification and security | veto everything else. | Correctness-preserving | optimization outranks | cosmetic or | explainability-only changes.","textChars":133,"textLines":6,"bbox":[487.3333333333333,438,307.3333333333333,132]}
+{"kind":"shape","slide":4,"id":"26","role":"card panel: Escalation path","shapeType":"roundRect","bbox":[842.6666666666666,352,355.3333333333333,240]}
+{"kind":"shape","slide":4,"id":"27","role":"card accent: Escalation path","shapeType":"rect","bbox":[842.6666666666666,352,8,240]}
+{"kind":"shape","slide":4,"id":"28","role":"icon badge","shapeType":"ellipse","bbox":[864.6666666666666,376,54,54]}
+{"kind":"shape","slide":4,"id":"29","role":"icon glyph","shapeType":"roundRect","bbox":[877.6666666666666,391,26,13]}
+{"kind":"shape","slide":4,"id":"30","role":"icon glyph","shapeType":"roundRect","bbox":[882.6666666666666,400,26,13]}
+{"kind":"shape","slide":4,"id":"31","role":"icon glyph","shapeType":"roundRect","bbox":[887.6666666666666,409,20,10]}
+{"kind":"textbox","slide":4,"id":"32","role":"card label","text":"Escalation path","textPreview":"Escalation path","textChars":15,"textLines":1,"bbox":[930.6666666666666,374,247.33333333333331,28]}
+{"kind":"textbox","slide":4,"id":"33","role":"card body: Escalation path","text":"Unresolved verification\nfailures, repeated\nineffective retries, or\ncompeting fixes are marked\nfor review instead of being\nsilently accepted.","textPreview":"Unresolved verification | failures, repeated | ineffective retries, or | competing fixes are marked | for review instead of being | silently accepted.","textChars":140,"textLines":6,"bbox":[866.6666666666666,438,307.3333333333333,132]}
+{"kind":"textbox","slide":4,"id":"34","role":"caption","text":"All meaningful copy, layout, and speaker notes are authored as editable PowerPoint objects.","textPreview":"All meaningful copy, layout, and speaker notes are authored as editable PowerPoint objects.","textChars":91,"textLines":1,"bbox":[64,674,980,22]}
+{"kind":"image","slide":5,"id":"2","role":"fallback art plate","path":"fallback-data-url","bbox":[0,0,1280,720]}
+{"kind":"shape","slide":5,"id":"3","role":"metrics contrast overlay","shapeType":"rect","bbox":[0,0,1280,720]}
+{"kind":"textbox","slide":5,"id":"4","role":"header","text":"WEEK 13 RESULTS","textPreview":"WEEK 13 RESULTS","textChars":15,"textLines":1,"bbox":[64,34,430,24]}
+{"kind":"textbox","slide":5,"id":"5","role":"header","text":"05 / 08","textPreview":"05 / 08","textChars":7,"textLines":1,"bbox":[1114,34,104,24]}
+{"kind":"shape","slide":5,"id":"6","role":"header rule","shapeType":"rect","bbox":[64,64,1152,2]}
+{"kind":"shape","slide":5,"id":"7","role":"header marker","shapeType":"ellipse","bbox":[57,57,16,16]}
+{"kind":"textbox","slide":5,"id":"8","role":"title","text":"Deterministic evaluation stayed safe and reproducible","textPreview":"Deterministic evaluation stayed safe and reproducible","textChars":53,"textLines":1,"bbox":[64,86,700,142]}
+{"kind":"textbox","slide":5,"id":"9","role":"subtitle","text":"Formal evidence was generated from 12 representative benchmark cases in no-LLM mode.","textPreview":"Formal evidence was generated from 12 representative benchmark cases in no-LLM mode.","textChars":84,"textLines":1,"bbox":[66,234,700,70]}
+{"kind":"shape","slide":5,"id":"10","role":"metric panel: cases executed","shapeType":"roundRect","bbox":[92,404,330,174]}
+{"kind":"shape","slide":5,"id":"11","role":"metric accent: cases executed","shapeType":"rect","bbox":[92,404,330,7]}
+{"kind":"textbox","slide":5,"id":"12","role":"metric value","text":"12","textPreview":"12","textChars":2,"textLines":1,"bbox":[114,428,286,54]}
+{"kind":"textbox","slide":5,"id":"13","role":"metric label","text":"cases executed","textPreview":"cases executed","textChars":14,"textLines":1,"bbox":[116,486,282,38]}
+{"kind":"textbox","slide":5,"id":"14","role":"metric note","text":"deterministic evaluation set","textPreview":"deterministic evaluation set","textChars":28,"textLines":1,"bbox":[116,536,282,22]}
+{"kind":"shape","slide":5,"id":"15","role":"metric panel: workflow PASS cases","shapeType":"roundRect","bbox":[462,404,330,174]}
+{"kind":"shape","slide":5,"id":"16","role":"metric accent: workflow PASS cases","shapeType":"rect","bbox":[462,404,330,7]}
+{"kind":"textbox","slide":5,"id":"17","role":"metric value","text":"10","textPreview":"10","textChars":2,"textLines":1,"bbox":[484,428,286,54]}
+{"kind":"textbox","slide":5,"id":"18","role":"metric label","text":"workflow PASS cases","textPreview":"workflow PASS cases","textChars":19,"textLines":1,"bbox":[486,486,282,38]}
+{"kind":"textbox","slide":5,"id":"19","role":"metric note","text":"2 cases escalated for review","textPreview":"2 cases escalated for review","textChars":28,"textLines":1,"bbox":[486,536,282,22]}
+{"kind":"shape","slide":5,"id":"20","role":"metric panel: new vulnerabilities introduced","shapeType":"roundRect","bbox":[832,404,330,174]}
+{"kind":"shape","slide":5,"id":"21","role":"metric accent: new vulnerabilities introduced","shapeType":"rect","bbox":[832,404,330,7]}
+{"kind":"textbox","slide":5,"id":"22","role":"metric value","text":"0","textPreview":"0","textChars":1,"textLines":1,"bbox":[854,428,286,54]}
+{"kind":"textbox","slide":5,"id":"23","role":"metric label","text":"new vulnerabilities introduced","textPreview":"new vulnerabilities introduced","textChars":30,"textLines":1,"bbox":[856,486,282,38]}
+{"kind":"textbox","slide":5,"id":"24","role":"metric note","text":"measured security regressions","textPreview":"measured security regressions","textChars":29,"textLines":1,"bbox":[856,536,282,22]}
+{"kind":"textbox","slide":5,"id":"25","role":"caption","text":"All meaningful copy, layout, and speaker notes are authored as editable PowerPoint objects.","textPreview":"All meaningful copy, layout, and speaker notes are authored as editable PowerPoint objects.","textChars":91,"textLines":1,"bbox":[64,674,980,22]}
+{"kind":"image","slide":6,"id":"2","role":"fallback art plate","path":"fallback-data-url","bbox":[0,0,1280,720]}
+{"kind":"shape","slide":6,"id":"3","role":"metrics contrast overlay","shapeType":"rect","bbox":[0,0,1280,720]}
+{"kind":"textbox","slide":6,"id":"4","role":"header","text":"PERFORMANCE","textPreview":"PERFORMANCE","textChars":11,"textLines":1,"bbox":[64,34,430,24]}
+{"kind":"textbox","slide":6,"id":"5","role":"header","text":"06 / 08","textPreview":"06 / 08","textChars":7,"textLines":1,"bbox":[1114,34,104,24]}
+{"kind":"shape","slide":6,"id":"6","role":"header rule","shapeType":"rect","bbox":[64,64,1152,2]}
+{"kind":"shape","slide":6,"id":"7","role":"header marker","shapeType":"ellipse","bbox":[57,57,16,16]}
+{"kind":"textbox","slide":6,"id":"8","role":"title","text":"Verification is the dominant runtime cost","textPreview":"Verification is the dominant runtime cost","textChars":41,"textLines":1,"bbox":[64,86,700,142]}
+{"kind":"textbox","slide":6,"id":"9","role":"subtitle","text":"The revised workflow prioritizes safety and explicit review over raw latency.","textPreview":"The revised workflow prioritizes safety and explicit review over raw latency.","textChars":77,"textLines":1,"bbox":[66,234,700,70]}
+{"kind":"shape","slide":6,"id":"10","role":"metric panel: average orchestrated latency","shapeType":"roundRect","bbox":[92,404,330,174]}
+{"kind":"shape","slide":6,"id":"11","role":"metric accent: average orchestrated latency","shapeType":"rect","bbox":[92,404,330,7]}
+{"kind":"textbox","slide":6,"id":"12","role":"metric value","text":"4.56 s","textPreview":"4.56 s","textChars":6,"textLines":1,"bbox":[114,428,286,54]}
+{"kind":"textbox","slide":6,"id":"13","role":"metric label","text":"average orchestrated latency","textPreview":"average orchestrated latency","textChars":28,"textLines":1,"bbox":[116,486,282,38]}
+{"kind":"textbox","slide":6,"id":"14","role":"metric note","text":"measured in deterministic mode","textPreview":"measured in deterministic mode","textChars":30,"textLines":1,"bbox":[116,536,282,22]}
+{"kind":"shape","slide":6,"id":"15","role":"metric panel: verification stage average","shapeType":"roundRect","bbox":[462,404,330,174]}
+{"kind":"shape","slide":6,"id":"16","role":"metric accent: verification stage average","shapeType":"rect","bbox":[462,404,330,7]}
+{"kind":"textbox","slide":6,"id":"17","role":"metric value","text":"4.25 s","textPreview":"4.25 s","textChars":6,"textLines":1,"bbox":[484,428,286,54]}
+{"kind":"textbox","slide":6,"id":"18","role":"metric label","text":"verification stage average","textPreview":"verification stage average","textChars":26,"textLines":1,"bbox":[486,486,282,38]}
+{"kind":"textbox","slide":6,"id":"19","role":"metric note","text":"dominant cost center","textPreview":"dominant cost center","textChars":20,"textLines":1,"bbox":[486,536,282,22]}
+{"kind":"shape","slide":6,"id":"20","role":"metric panel: correctness-style pass rate","shapeType":"roundRect","bbox":[832,404,330,174]}
+{"kind":"shape","slide":6,"id":"21","role":"metric accent: correctness-style pass rate","shapeType":"rect","bbox":[832,404,330,7]}
+{"kind":"textbox","slide":6,"id":"22","role":"metric value","text":"83.3%","textPreview":"83.3%","textChars":5,"textLines":1,"bbox":[854,428,286,54]}
+{"kind":"textbox","slide":6,"id":"23","role":"metric label","text":"correctness-style pass rate","textPreview":"correctness-style pass rate","textChars":27,"textLines":1,"bbox":[856,486,282,38]}
+{"kind":"textbox","slide":6,"id":"24","role":"metric note","text":"below the 95% aspiration","textPreview":"below the 95% aspiration","textChars":24,"textLines":1,"bbox":[856,536,282,22]}
+{"kind":"textbox","slide":6,"id":"25","role":"caption","text":"All meaningful copy, layout, and speaker notes are authored as editable PowerPoint objects.","textPreview":"All meaningful copy, layout, and speaker notes are authored as editable PowerPoint objects.","textChars":91,"textLines":1,"bbox":[64,674,980,22]}
+{"kind":"image","slide":7,"id":"2","role":"fallback art plate","path":"fallback-data-url","bbox":[0,0,1280,720]}
+{"kind":"shape","slide":7,"id":"3","role":"content contrast overlay","shapeType":"rect","bbox":[0,0,1280,720]}
+{"kind":"textbox","slide":7,"id":"4","role":"header","text":"DELIVERABLES","textPreview":"DELIVERABLES","textChars":12,"textLines":1,"bbox":[64,34,430,24]}
+{"kind":"textbox","slide":7,"id":"5","role":"header","text":"07 / 08","textPreview":"07 / 08","textChars":7,"textLines":1,"bbox":[1114,34,104,24]}
+{"kind":"shape","slide":7,"id":"6","role":"header rule","shapeType":"rect","bbox":[64,64,1152,2]}
+{"kind":"shape","slide":7,"id":"7","role":"header marker","shapeType":"ellipse","bbox":[57,57,16,16]}
+{"kind":"textbox","slide":7,"id":"8","role":"title","text":"The submission package now has code, evidence, and user-facing guides","textPreview":"The submission package now has code, evidence, and user-facing guides","textChars":69,"textLines":1,"bbox":[64,86,760,142]}
+{"kind":"textbox","slide":7,"id":"9","role":"subtitle","text":"Weeks 8 through 14 were closed out by pairing implementation work with corresponding documentation artifacts.","textPreview":"Weeks 8 through 14 were closed out by pairing implementation work with corresponding documentation artifacts.","textChars":109,"textLines":1,"bbox":[66,234,720,70]}
+{"kind":"shape","slide":7,"id":"10","role":"card panel: Engineering work","shapeType":"roundRect","bbox":[84,352,355.3333333333333,240]}
+{"kind":"shape","slide":7,"id":"11","role":"card accent: Engineering work","shapeType":"rect","bbox":[84,352,8,240]}
+{"kind":"shape","slide":7,"id":"12","role":"icon badge","shapeType":"ellipse","bbox":[106,376,54,54]}
+{"kind":"shape","slide":7,"id":"13","role":"icon glyph","shapeType":"rect","bbox":[122,405,6,12]}
+{"kind":"shape","slide":7,"id":"14","role":"icon glyph","shapeType":"rect","bbox":[131,397,6,20]}
+{"kind":"shape","slide":7,"id":"15","role":"icon glyph","shapeType":"rect","bbox":[140,390,6,27]}
+{"kind":"textbox","slide":7,"id":"16","role":"card label","text":"Engineering work","textPreview":"Engineering work","textChars":16,"textLines":1,"bbox":[172,374,247.33333333333331,28]}
+{"kind":"textbox","slide":7,"id":"17","role":"card body: Engineering work","text":"Refinement, orchestration,\nreporting, domain rules,\ncaching, timing capture,\ndeterministic tests, and\napp-path wiring are now\nimplemented in the\nrepository.","textPreview":"Refinement, orchestration, | reporting, domain rules, | caching, timing capture, | deterministic tests, and | app-path wiring are now | implemented in the | repository.","textChars":156,"textLines":7,"bbox":[108,438,307.3333333333333,132]}
+{"kind":"shape","slide":7,"id":"18","role":"card panel: Formal evidence","shapeType":"roundRect","bbox":[463.3333333333333,352,355.3333333333333,240]}
+{"kind":"shape","slide":7,"id":"19","role":"card accent: Formal evidence","shapeType":"rect","bbox":[463.3333333333333,352,8,240]}
+{"kind":"shape","slide":7,"id":"20","role":"icon badge","shapeType":"ellipse","bbox":[485.3333333333333,376,54,54]}
+{"kind":"shape","slide":7,"id":"21","role":"icon glyph","shapeType":"ellipse","bbox":[498.3333333333333,394,10,10]}
+{"kind":"shape","slide":7,"id":"22","role":"icon glyph","shapeType":"ellipse","bbox":[516.3333333333333,403,10,10]}
+{"kind":"shape","slide":7,"id":"23","role":"icon glyph","shapeType":"rect","bbox":[507.3333333333333,401,19,3]}
+{"kind":"textbox","slide":7,"id":"24","role":"card label","text":"Formal evidence","textPreview":"Formal evidence","textChars":15,"textLines":1,"bbox":[551.3333333333333,374,247.33333333333331,28]}
+{"kind":"textbox","slide":7,"id":"25","role":"card body: Formal evidence","text":"The report set includes\ncomplete test results,\nperformance benchmarks,\ncomparative analysis, Phase\n2 and Phase 3 reports, and a\ncombined final dossier.","textPreview":"The report set includes | complete test results, | performance benchmarks, | comparative analysis, Phase | 2 and Phase 3 reports, and a | combined final dossier.","textChars":151,"textLines":6,"bbox":[487.3333333333333,438,307.3333333333333,132]}
+{"kind":"shape","slide":7,"id":"26","role":"card panel: Operational docs","shapeType":"roundRect","bbox":[842.6666666666666,352,355.3333333333333,240]}
+{"kind":"shape","slide":7,"id":"27","role":"card accent: Operational docs","shapeType":"rect","bbox":[842.6666666666666,352,8,240]}
+{"kind":"shape","slide":7,"id":"28","role":"icon badge","shapeType":"ellipse","bbox":[864.6666666666666,376,54,54]}
+{"kind":"shape","slide":7,"id":"29","role":"icon glyph","shapeType":"roundRect","bbox":[877.6666666666666,391,26,13]}
+{"kind":"shape","slide":7,"id":"30","role":"icon glyph","shapeType":"roundRect","bbox":[882.6666666666666,400,26,13]}
+{"kind":"shape","slide":7,"id":"31","role":"icon glyph","shapeType":"roundRect","bbox":[887.6666666666666,409,20,10]}
+{"kind":"textbox","slide":7,"id":"32","role":"card label","text":"Operational docs","textPreview":"Operational docs","textChars":16,"textLines":1,"bbox":[930.6666666666666,374,247.33333333333331,28]}
+{"kind":"textbox","slide":7,"id":"33","role":"card body: Operational docs","text":"The user manual, developer\nguide, conflict framework,\nfailure taxonomy, and CLI\nexplainability guide\ncomplete the academic\ndelivery package.","textPreview":"The user manual, developer | guide, conflict framework, | failure taxonomy, and CLI | explainability guide | complete the academic | delivery package.","textChars":140,"textLines":6,"bbox":[866.6666666666666,438,307.3333333333333,132]}
+{"kind":"textbox","slide":7,"id":"34","role":"caption","text":"All meaningful copy, layout, and speaker notes are authored as editable PowerPoint objects.","textPreview":"All meaningful copy, layout, and speaker notes are authored as editable PowerPoint objects.","textChars":91,"textLines":1,"bbox":[64,674,980,22]}
+{"kind":"image","slide":8,"id":"2","role":"fallback art plate","path":"fallback-data-url","bbox":[0,0,1280,720]}
+{"kind":"shape","slide":8,"id":"3","role":"content contrast overlay","shapeType":"rect","bbox":[0,0,1280,720]}
+{"kind":"textbox","slide":8,"id":"4","role":"header","text":"CONCLUSION","textPreview":"CONCLUSION","textChars":10,"textLines":1,"bbox":[64,34,430,24]}
+{"kind":"textbox","slide":8,"id":"5","role":"header","text":"08 / 08","textPreview":"08 / 08","textChars":7,"textLines":1,"bbox":[1114,34,104,24]}
+{"kind":"shape","slide":8,"id":"6","role":"header rule","shapeType":"rect","bbox":[64,64,1152,2]}
+{"kind":"shape","slide":8,"id":"7","role":"header marker","shapeType":"ellipse","bbox":[57,57,16,16]}
+{"kind":"textbox","slide":8,"id":"8","role":"title","text":"DeepCompile is now strongest as a safe and auditable optimization workflow","textPreview":"DeepCompile is now strongest as a safe and auditable optimization workflow","textChars":74,"textLines":1,"bbox":[64,86,760,142]}
+{"kind":"textbox","slide":8,"id":"9","role":"subtitle","text":"The final package is honest about current limits while still delivering a complete Weeks 8-14 submission set.","textPreview":"The final package is honest about current limits while still delivering a complete Weeks 8-14 submission set.","textChars":109,"textLines":1,"bbox":[66,234,720,70]}
+{"kind":"shape","slide":8,"id":"10","role":"card panel: What worked","shapeType":"roundRect","bbox":[84,352,355.3333333333333,240]}
+{"kind":"shape","slide":8,"id":"11","role":"card accent: What worked","shapeType":"rect","bbox":[84,352,8,240]}
+{"kind":"shape","slide":8,"id":"12","role":"icon badge","shapeType":"ellipse","bbox":[106,376,54,54]}
+{"kind":"shape","slide":8,"id":"13","role":"icon glyph","shapeType":"rect","bbox":[122,405,6,12]}
+{"kind":"shape","slide":8,"id":"14","role":"icon glyph","shapeType":"rect","bbox":[131,397,6,20]}
+{"kind":"shape","slide":8,"id":"15","role":"icon glyph","shapeType":"rect","bbox":[140,390,6,27]}
+{"kind":"textbox","slide":8,"id":"16","role":"card label","text":"What worked","textPreview":"What worked","textChars":11,"textLines":1,"bbox":[172,374,247.33333333333331,28]}
+{"kind":"textbox","slide":8,"id":"17","role":"card body: What worked","text":"The project now demonstrates\nsafe-by-design\norchestration, zero measured\nsecurity regressions in the\nevaluation set, and coherent\nreport exports across the\nworkflow.","textPreview":"The project now demonstrates | safe-by-design | orchestration, zero measured | security regressions in the | evaluation set, and coherent | report exports across the | workflow.","textChars":165,"textLines":7,"bbox":[108,438,307.3333333333333,132]}
+{"kind":"shape","slide":8,"id":"18","role":"card panel: What remains hard","shapeType":"roundRect","bbox":[463.3333333333333,352,355.3333333333333,240]}
+{"kind":"shape","slide":8,"id":"19","role":"card accent: What remains hard","shapeType":"rect","bbox":[463.3333333333333,352,8,240]}
+{"kind":"shape","slide":8,"id":"20","role":"icon badge","shapeType":"ellipse","bbox":[485.3333333333333,376,54,54]}
+{"kind":"shape","slide":8,"id":"21","role":"icon glyph","shapeType":"ellipse","bbox":[498.3333333333333,394,10,10]}
+{"kind":"shape","slide":8,"id":"22","role":"icon glyph","shapeType":"ellipse","bbox":[516.3333333333333,403,10,10]}
+{"kind":"shape","slide":8,"id":"23","role":"icon glyph","shapeType":"rect","bbox":[507.3333333333333,401,19,3]}
+{"kind":"textbox","slide":8,"id":"24","role":"card label","text":"What remains hard","textPreview":"What remains hard","textChars":17,"textLines":1,"bbox":[551.3333333333333,374,247.33333333333331,28]}
+{"kind":"textbox","slide":8,"id":"25","role":"card body: What remains hard","text":"Verification dominates\nlatency and the measured\npass rate remains below the\noriginal aspirational\ntarget, so future work\nshould prioritize efficiency\nand broader rule coverage.","textPreview":"Verification dominates | latency and the measured | pass rate remains below the | original aspirational | target, so future work | should prioritize efficiency | and broader rule c","textChars":176,"textLines":7,"bbox":[487.3333333333333,438,307.3333333333333,132]}
+{"kind":"shape","slide":8,"id":"26","role":"card panel: Next step","shapeType":"roundRect","bbox":[842.6666666666666,352,355.3333333333333,240]}
+{"kind":"shape","slide":8,"id":"27","role":"card accent: Next step","shapeType":"rect","bbox":[842.6666666666666,352,8,240]}
+{"kind":"shape","slide":8,"id":"28","role":"icon badge","shapeType":"ellipse","bbox":[864.6666666666666,376,54,54]}
+{"kind":"shape","slide":8,"id":"29","role":"icon glyph","shapeType":"roundRect","bbox":[877.6666666666666,391,26,13]}
+{"kind":"shape","slide":8,"id":"30","role":"icon glyph","shapeType":"roundRect","bbox":[882.6666666666666,400,26,13]}
+{"kind":"shape","slide":8,"id":"31","role":"icon glyph","shapeType":"roundRect","bbox":[887.6666666666666,409,20,10]}
+{"kind":"textbox","slide":8,"id":"32","role":"card label","text":"Next step","textPreview":"Next step","textChars":9,"textLines":1,"bbox":[930.6666666666666,374,247.33333333333331,28]}
+{"kind":"textbox","slide":8,"id":"33","role":"card body: Next step","text":"Expand deterministic rule\ncoverage, improve\nverification efficiency, and\nrevisit optional LLM\nassistance only after the\nbaseline rule-driven\nworkflow is stronger.","textPreview":"Expand deterministic rule | coverage, improve | verification efficiency, and | revisit optional LLM | assistance only after the | baseline rule-driven | workflow is stronger.","textChars":162,"textLines":7,"bbox":[866.6666666666666,438,307.3333333333333,132]}
+{"kind":"textbox","slide":8,"id":"34","role":"caption","text":"All meaningful copy, layout, and speaker notes are authored as editable PowerPoint objects.","textPreview":"All meaningful copy, layout, and speaker notes are authored as editable PowerPoint objects.","textChars":91,"textLines":1,"bbox":[64,674,980,22]}

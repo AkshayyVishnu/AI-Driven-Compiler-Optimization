@@ -1,0 +1,47 @@
+{
+  "tc": "TC23",
+  "config": "rule_orch",
+  "expected": [
+    "invalid_pointer"
+  ],
+  "headline": true,
+  "supported": false,
+  "nondeterministic": true,
+  "detected": {
+    "invalid_pointer": false
+  },
+  "n_findings": 0,
+  "detect_s": 0.015,
+  "workflow_status": "PASS",
+  "iterations": 0,
+  "stop_reason": "initial_pass",
+  "pipeline_status": "success",
+  "pipeline_s": 1.894,
+  "ver_status": "PASS",
+  "sec_status": "PASS",
+  "diff_passed": true,
+  "transformations": [],
+  "stage_timings": {
+    "analysis": {
+      "parse_s": 0.0002,
+      "rule_s": 0.0013,
+      "llm_s": 0.0
+    },
+    "optimization": {
+      "rule_s": 0.001,
+      "llm_s": 0.0
+    },
+    "verification": {
+      "parallel_checks_s": 1.8055,
+      "llm_s": 0.0
+    },
+    "security": {
+      "total_s": 0.0024
+    }
+  },
+  "llm_fallback": false,
+  "code_changed": false,
+  "corrected_detector": null,
+  "output_matches_sol": null,
+  "fp_on_sol": false
+}

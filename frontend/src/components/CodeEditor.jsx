@@ -1,7 +1,6 @@
-import { useRef } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import Editor from '@monaco-editor/react'
 import { FileCode, Trash2, Copy, Check } from 'lucide-react'
-import { useState } from 'react'
 
 const LANGUAGES = [
   { value: 'cpp',    label: 'C++',    monaco: 'cpp'        },
@@ -65,22 +64,129 @@ const MONACO_DARK_THEME = {
   },
 }
 
-export default function CodeEditor({ code, setCode, language, setLanguage, theme }) {
-  const editorRef       = useRef(null)
-  const [copied, setCopied] = useState(false)
+export default function CodeEditor({
+  code, setCode, language, setLanguage, theme,
+  allErrors = [],
+  fixedErrors = new Set(),
+  onGutterClick,
+  onEditorMount,
+}) {
+  const editorRef             = useRef(null)
+  const monacoRef             = useRef(null)
+  const decorationsRef        = useRef(null)
+  const lineHighlightDecRef   = useRef(null)
+  const [copied, setCopied]   = useState(false)
+
+  // Keep a stable ref so the onMouseDown closure always reads the latest errors
+  const findingsRef = useRef(allErrors)
+  useEffect(() => { findingsRef.current = allErrors }, [allErrors])
 
   const monacoLang = LANGUAGES.find(l => l.value === language)?.monaco ?? 'cpp'
   const monacoThemeName = theme === 'dark' ? 'compiler-dark' : 'compiler-light'
 
+  // ── Sync decorations whenever errors or fixedErrors change ────────────────
+  useEffect(() => {
+    const editor = editorRef.current
+    const monaco = monacoRef.current
+    if (!editor || !monaco) return
+
+    const model = editor.getModel()
+    if (!model) return
+
+    const errKey  = f => `${f.type}:${f.line}`
+    const unfixed = allErrors.filter(f => !fixedErrors.has(errKey(f)))
+
+    // 1. Squiggly markers — only for unfixed errors; fixed lines get no red squiggle
+    const markers = unfixed.map(f => ({
+      startLineNumber: f.line ?? 1,
+      startColumn:     f.col_start ?? 1,
+      endLineNumber:   f.line ?? 1,
+      endColumn:       Math.max((f.col_start ?? 1) + 1, f.col_end ?? (f.col_start ?? 1) + 8),
+      message:         `[${(f.severity ?? 'info').toUpperCase()}] ${(f.type ?? '').replace(/_/g, ' ')}: ${f.description}`,
+      severity:        f.severity === 'high'   ? monaco.MarkerSeverity.Error
+                     : f.severity === 'medium' ? monaco.MarkerSeverity.Warning
+                     :                           monaco.MarkerSeverity.Info,
+      source:          'error-scan',
+    }))
+    monaco.editor.setModelMarkers(model, 'error-scan', markers)
+
+    // 2. Gutter glyphs — only for unfixed errors
+    if (decorationsRef.current) decorationsRef.current.clear()
+    // 3. Full-line highlights — red for unfixed, green for fixed, nothing for clean lines
+    if (lineHighlightDecRef.current) lineHighlightDecRef.current.clear()
+
+    const glyphDecorations = unfixed.map(f => ({
+      range: new monaco.Range(f.line ?? 1, 1, f.line ?? 1, 1),
+      options: {
+        glyphMarginClassName: `security-glyph-${f.severity ?? 'low'}`,
+        glyphMarginHoverMessage: {
+          value: `**${(f.severity ?? 'info').toUpperCase()}** ${(f.type ?? '').replace(/_/g, ' ')} — click for details`,
+        },
+        isWholeLine: false,
+      },
+    }))
+
+    const lineDecorations = [
+      // Red highlight only for unfixed errors — fixed lines get no decoration at all
+      ...unfixed.map(f => ({
+        range: new monaco.Range(f.line ?? 1, 1, f.line ?? 1, 1),
+        options: {
+          isWholeLine: true,
+          className:   'error-line-unfixed',
+          overviewRuler: {
+            color:    'rgba(220,38,38,0.6)',
+            position: monaco.editor.OverviewRulerLane.Right,
+          },
+        },
+      })),
+      // fixed array intentionally produces no decorations — line returns to normal
+    ]
+
+    if (glyphDecorations.length > 0) {
+      decorationsRef.current = editor.createDecorationsCollection(glyphDecorations)
+    }
+    if (lineDecorations.length > 0) {
+      lineHighlightDecRef.current = editor.createDecorationsCollection(lineDecorations)
+    }
+  }, [allErrors, fixedErrors])
+
   function handleEditorMount(editor, monaco) {
-    editorRef.current = editor
+    editorRef.current  = editor
+    monacoRef.current  = monaco
 
     monaco.editor.defineTheme('compiler-light', MONACO_LIGHT_THEME)
     monaco.editor.defineTheme('compiler-dark',  MONACO_DARK_THEME)
     monaco.editor.setTheme(monacoThemeName)
+
+    // Expose editor + monaco instance to parent for imperative fixes
+    onEditorMount?.(editor, monaco)
+
+    // Gutter click detection
+    editor.onMouseDown((e) => {
+      if (
+        e.target.type === monaco.editor.MouseTargetType.GUTTER_GLYPH_MARGIN &&
+        onGutterClick
+      ) {
+        const line    = e.target.position?.lineNumber
+        const finding = findingsRef.current.find(f => f.line === line)
+        if (finding) {
+          const domNode  = editor.getDomNode()
+          if (!domNode) return
+          const rect     = domNode.getBoundingClientRect()
+          const scrolled = editor.getScrolledVisiblePosition(e.target.position)
+          if (scrolled) {
+            onGutterClick(finding, {
+              x: rect.left + scrolled.left + 28,
+              y: rect.top  + scrolled.top,
+            })
+          }
+        }
+      }
+    })
   }
 
   function handleEditorWillMount(monaco) {
+    monacoRef.current = monaco
     monaco.editor.defineTheme('compiler-light', MONACO_LIGHT_THEME)
     monaco.editor.defineTheme('compiler-dark',  MONACO_DARK_THEME)
   }
@@ -138,6 +244,7 @@ export default function CodeEditor({ code, setCode, language, setLanguage, theme
           beforeMount={handleEditorWillMount}
           onMount={handleEditorMount}
           options={{
+            glyphMargin:          true,
             fontSize:             13,
             fontFamily:           "'JetBrains Mono', 'Fira Code', monospace",
             fontLigatures:        true,

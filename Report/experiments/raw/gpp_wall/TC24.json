@@ -1,0 +1,15 @@
+{
+  "tc": "TC24",
+  "config": "gpp_wall",
+  "expected": [
+    "invalid_pointer"
+  ],
+  "headline": true,
+  "supported": false,
+  "nondeterministic": true,
+  "detected": {
+    "invalid_pointer": false
+  },
+  "n_findings": 1,
+  "ver_status": "n/a"
+}

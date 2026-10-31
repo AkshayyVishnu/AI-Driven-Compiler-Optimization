@@ -126,6 +126,34 @@ function AgentMessageLine({ data, ts }) {
 }
 
 function ErrorLine({ data, ts }) {
+  const isSecurity = data?.phase === 'security'
+
+  if (isSecurity) {
+    return (
+      <div style={{
+        margin: '4px 0',
+        padding: '6px 12px',
+        background: 'rgba(234,88,12,0.08)',
+        border: '1px solid rgba(234,88,12,0.40)',
+        borderRadius: 6,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+      }}>
+        <span className="term-ts">{formatTime(ts)}</span>
+        <span style={{
+          fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 4,
+          background: 'rgba(234,88,12,0.15)', color: '#ea580c',
+          border: '1px solid rgba(234,88,12,0.35)', whiteSpace: 'nowrap',
+          letterSpacing: '0.3px',
+        }}>SEC</span>
+        <span style={{ color: '#ea580c', fontWeight: 500, fontSize: 12 }}>
+          {data?.message ?? 'An unknown error occurred'}
+        </span>
+      </div>
+    )
+  }
+
   return (
     <div>
       <div className="term-line">

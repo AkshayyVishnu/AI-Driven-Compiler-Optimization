@@ -1,0 +1,17 @@
+{
+  "tc": "TC57",
+  "config": "gpp_wall",
+  "expected": [
+    "uninitialized",
+    "buffer_overflow"
+  ],
+  "headline": false,
+  "supported": true,
+  "nondeterministic": true,
+  "detected": {
+    "uninitialized": true,
+    "buffer_overflow": false
+  },
+  "n_findings": 3,
+  "ver_status": "n/a"
+}

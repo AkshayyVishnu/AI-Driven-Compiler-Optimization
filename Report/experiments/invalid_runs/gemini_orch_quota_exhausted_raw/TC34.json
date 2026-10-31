@@ -1,0 +1,46 @@
+{
+  "tc": "TC34",
+  "config": "gemini_orch",
+  "expected": [
+    "nontermination"
+  ],
+  "headline": true,
+  "supported": false,
+  "nondeterministic": false,
+  "detected": {
+    "nontermination": false
+  },
+  "n_findings": 0,
+  "detect_s": 0.995,
+  "workflow_status": "PASS",
+  "iterations": 0,
+  "stop_reason": "initial_pass",
+  "pipeline_status": "success",
+  "pipeline_s": 2.66,
+  "ver_status": "PASS",
+  "sec_status": "PASS",
+  "diff_passed": true,
+  "transformations": [],
+  "stage_timings": {
+    "analysis": {
+      "parse_s": 0.0002,
+      "rule_s": 0.0015,
+      "llm_s": 0.5396
+    },
+    "optimization": {
+      "rule_s": 0.0008,
+      "llm_s": 0.4195
+    },
+    "verification": {
+      "parallel_checks_s": 1.6986,
+      "llm_s": 0.4696
+    },
+    "security": {
+      "total_s": 0.4433
+    }
+  },
+  "llm_fallback": true,
+  "code_changed": false,
+  "corrected_detector": null,
+  "output_matches_sol": false
+}

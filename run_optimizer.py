@@ -47,7 +47,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from src.logger_config import setup_logging
 from agent_framework import ContextManager
-from src.llm.llm_client import LLMClient
+from src.llm.llm_client import LLMClient, make_llm_client
 from src.agents.analysis_agent import AnalysisAgent
 from src.agents.optimization_agent import OptimizationAgent
 
@@ -108,6 +108,8 @@ Examples:
     parser.add_argument("file",       help="C/C++ source file to optimize")
     parser.add_argument("--no-llm",   action="store_true",
                         help="Skip LLM — use rule-based fixes only (faster)")
+    parser.add_argument("--gemini",   action="store_true",
+                        help="Use Google Gemini API instead of Ollama (requires GEMINI_API_KEY)")
     parser.add_argument("--out",      metavar="PATH", default=None,
                         help="Custom output path for the optimized file")
     parser.add_argument("--verbose",  "-v", action="store_true",
@@ -127,12 +129,19 @@ Examples:
 
     # ── Header ─────────────────────────────────────────────────────────────────
     print()
-    _banner("AI COMPILER OPTIMIZATION — OPTIMIZER AGENT")
+    _banner("DEEPCOMPILE — OPTIMIZER AGENT")
 
     file_path = os.path.abspath(args.file)
     print(f"\n  Target : {_c(file_path, BOLD)}")
     print(f"  Log    : {_c(log_path, DIM)}")
-    print(f"  Mode   : {_c('rule-based only' if args.no_llm else 'full (LLM + rules)', YELLOW)}\n")
+    backend = "gemini" if args.gemini else "ollama"
+    if args.no_llm:
+        mode_str = "rule-based only"
+    elif args.gemini:
+        mode_str = "full (Gemini + rules)"
+    else:
+        mode_str = "full (Ollama + rules)"
+    print(f"  Mode   : {_c(mode_str, YELLOW)}\n")
 
     if not os.path.isfile(file_path):
         logger.error(f"File not found: {file_path}")
@@ -144,7 +153,7 @@ Examples:
 
     # ── Build agents ───────────────────────────────────────────────────────────
     context = ContextManager()
-    llm     = LLMClient()
+    llm     = make_llm_client(backend)
 
     analysis_agent     = AnalysisAgent("analysis_1", context, llm)
     optimization_agent = OptimizationAgent("optimization_1", context, llm)
@@ -156,9 +165,11 @@ Examples:
     else:
         status = llm.health_check()
         if status.get("available"):
-            print(_c(f"  [LLM] Connected → {status.get('model')}", GREEN))
+            label = f"Gemini → {status.get('model')}" if args.gemini else f"Ollama → {status.get('model')}"
+            print(_c(f"  [LLM] Connected — {label}", GREEN))
         else:
-            print(_c("  [LLM] Ollama not running — stub/rule-based fallback", YELLOW))
+            fallback = "Gemini API unavailable" if args.gemini else "Ollama not running"
+            print(_c(f"  [LLM] {fallback} — stub/rule-based fallback", YELLOW))
 
     # ── Step 1: Analysis ───────────────────────────────────────────────────────
     _step(1, 2, "Analysis Agent   — scanning for issues")

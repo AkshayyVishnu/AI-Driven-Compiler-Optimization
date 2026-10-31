@@ -1,0 +1,15 @@
+{
+  "tc": "TC51",
+  "config": "gpp_wall",
+  "expected": [
+    "toctou"
+  ],
+  "headline": true,
+  "supported": true,
+  "nondeterministic": false,
+  "detected": {
+    "toctou": false
+  },
+  "n_findings": 0,
+  "ver_status": "n/a"
+}

@@ -330,8 +330,8 @@ def build_pdf(md_path: str, out_path: str):
         rightMargin=2 * cm,
         topMargin=2 * cm,
         bottomMargin=2 * cm,
-        title="CLI Command Reference — AI-Driven Compiler Optimization System",
-        author="AI-Driven Compiler Optimization System",
+        title="CLI Command Reference — DeepCompile",
+        author="DeepCompile",
     )
 
     story = []
@@ -339,7 +339,7 @@ def build_pdf(md_path: str, out_path: str):
     # ── Cover block ────────────────────────────────────────────────────────────
     story.append(Spacer(1, 1.5 * cm))
     story.append(Paragraph(
-        "AI-Driven Compiler Optimization System",
+        "DeepCompile",
         styles["DocTitle"],
     ))
     story.append(Paragraph(
@@ -360,7 +360,7 @@ def build_pdf(md_path: str, out_path: str):
     story.append(Spacer(1, 0.6 * cm))
     story.append(_rule())
     story.append(Paragraph(
-        "AI-Driven Compiler Optimization System  ·  24CSB0A06  ·  Week 8",
+        "DeepCompile  ·  24CSB0A06  ·  Week 8",
         styles["DocVersion"],
     ))
 
@@ -377,7 +377,7 @@ def build_pdf(md_path: str, out_path: str):
         canvas.drawString(
             2 * cm,
             1.2 * cm,
-            "CLI Command Reference — AI-Driven Compiler Optimization System",
+            "CLI Command Reference — DeepCompile",
         )
         canvas.restoreState()
 

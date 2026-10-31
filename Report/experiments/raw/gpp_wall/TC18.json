@@ -1,0 +1,15 @@
+{
+  "tc": "TC18",
+  "config": "gpp_wall",
+  "expected": [
+    "invalid_free"
+  ],
+  "headline": true,
+  "supported": false,
+  "nondeterministic": true,
+  "detected": {
+    "invalid_free": false
+  },
+  "n_findings": 0,
+  "ver_status": "n/a"
+}

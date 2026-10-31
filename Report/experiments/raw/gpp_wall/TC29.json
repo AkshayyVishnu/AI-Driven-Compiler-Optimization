@@ -1,0 +1,15 @@
+{
+  "tc": "TC29",
+  "config": "gpp_wall",
+  "expected": [
+    "int_arith"
+  ],
+  "headline": true,
+  "supported": true,
+  "nondeterministic": false,
+  "detected": {
+    "int_arith": true
+  },
+  "n_findings": 1,
+  "ver_status": "n/a"
+}

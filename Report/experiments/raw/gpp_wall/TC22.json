@@ -1,0 +1,15 @@
+{
+  "tc": "TC22",
+  "config": "gpp_wall",
+  "expected": [
+    "null_deref"
+  ],
+  "headline": true,
+  "supported": true,
+  "nondeterministic": false,
+  "detected": {
+    "null_deref": false
+  },
+  "n_findings": 0,
+  "ver_status": "n/a"
+}

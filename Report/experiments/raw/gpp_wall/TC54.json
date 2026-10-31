@@ -1,0 +1,15 @@
+{
+  "tc": "TC54",
+  "config": "gpp_wall",
+  "expected": [
+    "deadlock"
+  ],
+  "headline": true,
+  "supported": false,
+  "nondeterministic": true,
+  "detected": {
+    "deadlock": false
+  },
+  "n_findings": 11,
+  "ver_status": "n/a"
+}

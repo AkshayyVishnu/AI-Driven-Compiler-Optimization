@@ -1,0 +1,15 @@
+{
+  "tc": "TC08",
+  "config": "gpp_wall",
+  "expected": [
+    "div_by_zero"
+  ],
+  "headline": true,
+  "supported": true,
+  "nondeterministic": false,
+  "detected": {
+    "div_by_zero": false
+  },
+  "n_findings": 0,
+  "ver_status": "n/a"
+}

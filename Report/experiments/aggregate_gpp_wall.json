@@ -1,0 +1,20 @@
+{
+  "headline_cases": 54,
+  "detected_overall": 11,
+  "detection_rate_overall": 0.2037037037037037,
+  "supported_cases": 45,
+  "detection_rate_within_coverage": 0.2,
+  "multi_rule_recall": 0.3333333333333333,
+  "corrected_detector_judged": 0,
+  "corrected_denominator": 0,
+  "ver_status_counts": {
+    "n/a": 58
+  },
+  "errors": [],
+  "rows_total": 58,
+  "output_matches_sol": 0,
+  "output_sol_checked": 0,
+  "fp_on_sol": 0,
+  "fp_denominator": 0,
+  "llm_fallback": 0
+}

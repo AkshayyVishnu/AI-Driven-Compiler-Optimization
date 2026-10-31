@@ -1,0 +1,48 @@
+{
+  "tc": "TC11",
+  "config": "rule_basic",
+  "expected": [
+    "buffer_overflow"
+  ],
+  "headline": true,
+  "supported": true,
+  "nondeterministic": true,
+  "detected": {
+    "buffer_overflow": true
+  },
+  "n_findings": 3,
+  "detect_s": 0.013,
+  "pipeline_status": "success",
+  "pipeline_s": 1.307,
+  "ver_status": "PASS",
+  "sec_status": "PASS",
+  "diff_passed": true,
+  "transformations": [
+    "off_by_one_fix",
+    "strength_reduction",
+    "prefer_preincrement"
+  ],
+  "stage_timings": {
+    "analysis": {
+      "parse_s": 0.0002,
+      "rule_s": 0.0012,
+      "llm_s": 0.0
+    },
+    "optimization": {
+      "rule_s": 0.0006,
+      "llm_s": 0.0
+    },
+    "verification": {
+      "parallel_checks_s": 1.3046,
+      "llm_s": 0.0
+    },
+    "security": {
+      "total_s": 0.0004
+    }
+  },
+  "llm_fallback": false,
+  "code_changed": true,
+  "corrected_detector": false,
+  "output_matches_sol": null,
+  "fp_on_sol": true
+}

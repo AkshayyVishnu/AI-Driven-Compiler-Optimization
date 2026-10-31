@@ -1,0 +1,44 @@
+{
+  "tc": "TC22",
+  "config": "rule_basic",
+  "expected": [
+    "null_deref"
+  ],
+  "headline": true,
+  "supported": true,
+  "nondeterministic": false,
+  "detected": {
+    "null_deref": false
+  },
+  "n_findings": 0,
+  "detect_s": 0.013,
+  "pipeline_status": "success",
+  "pipeline_s": 2.016,
+  "ver_status": "PASS",
+  "sec_status": "PASS",
+  "diff_passed": true,
+  "transformations": [],
+  "stage_timings": {
+    "analysis": {
+      "parse_s": 0.0001,
+      "rule_s": 0.001,
+      "llm_s": 0.0
+    },
+    "optimization": {
+      "rule_s": 0.0006,
+      "llm_s": 0.0
+    },
+    "verification": {
+      "parallel_checks_s": 2.0132,
+      "llm_s": 0.0
+    },
+    "security": {
+      "total_s": 0.002
+    }
+  },
+  "llm_fallback": false,
+  "code_changed": false,
+  "corrected_detector": null,
+  "output_matches_sol": false,
+  "fp_on_sol": false
+}

@@ -1,4 +1,4 @@
-# CLI Command Reference — AI-Driven Compiler Optimization System
+# CLI Command Reference — DeepCompile
 
 Complete reference for every command you can run against a C/C++ source file.
 **Updated: Week 8** — Security Agent added, Phase 2 Integration Report generator added.

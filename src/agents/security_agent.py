@@ -16,7 +16,9 @@ import os
 import re
 import subprocess
 import sys
+import time
 import xml.etree.ElementTree as ET
+from copy import deepcopy
 from typing import Any, Dict, List, Optional, Tuple
 
 _root = os.path.join(os.path.dirname(__file__), "..", "..")
@@ -27,8 +29,11 @@ from agent_framework import BaseAgent, ContextManager
 from src.llm.llm_client import LLMClient
 from src.llm.prompt_templates import SecurityPromptTemplate
 from src.reasoning.cot_validator import CoTValidator
+from src.runtime_cache import ResultCache, make_cache_key
+from src.temp_paths import runtime_temp_dir
 
 logger = logging.getLogger(__name__)
+_SECURITY_CACHE = ResultCache(max_entries=128)
 
 
 class SecurityAgent(BaseAgent):
@@ -99,6 +104,21 @@ class SecurityAgent(BaseAgent):
         re.MULTILINE,
     )
 
+    # ── Layer 1: Hardcoded secrets ─────────────────────────────────────────────
+    # Matches variable names that contain or equal the keyword (e.g. adminPass,
+    # AUTH_TOKEN, password[], myApiKey) — \w* prefix/suffix + optional array []
+    _HARDCODED_SECRET_RE = re.compile(
+        r'\b\w*(?:password|passwd|pass|secret|api_key|apikey|token|auth_key|authkey'
+        r'|access_key|private_key|credentials?|passphrase)\w*'
+        r'(?:\s*\[\s*\d*\s*\])?\s*=\s*"([^"]{4,})"',
+        re.IGNORECASE | re.MULTILINE,
+    )
+    # Matches #define macros whose name contains a keyword (e.g. SECRET_KEY, MY_TOKEN)
+    _HARDCODED_SECRET_DEFINE_RE = re.compile(
+        r'#define\s+\w*(?:PASSWORD|PASSWD|SECRET|API_KEY|TOKEN|AUTH|PASS)\w*\s+"([^"]{3,})"',
+        re.IGNORECASE | re.MULTILINE,
+    )
+
     def __init__(self, agent_id: str, context_manager: ContextManager,
                  llm_client: LLMClient = None):
         # Set instance attributes BEFORE super().__init__() because BaseAgent
@@ -134,16 +154,28 @@ class SecurityAgent(BaseAgent):
         original_code  = input_data.get("original_code", "")
         optimized_code = input_data.get("optimized_code", original_code)
         file_path      = input_data.get("file_path", "<unknown>")
+        cache_enabled = input_data.get("use_cache", True)
 
         if not optimized_code.strip():
             logger.error("SecurityAgent: no code provided")
             return {"error": "No code provided", "status": "PASS",
                     "new_vulnerabilities": [], "all_vulnerabilities": []}
 
+        cache_key = make_cache_key("security", original_code, optimized_code)
+        if cache_enabled:
+            cached = _SECURITY_CACHE.get(cache_key)
+            if cached is not None:
+                cached_result = deepcopy(cached)
+                cached_result["cache_hit"] = True
+                self.context.set("security_findings", cached_result)
+                return cached_result
+
         logger.info(
             f"SecurityAgent: auditing '{os.path.basename(file_path)}' "
             f"({len(optimized_code)} chars)"
         )
+
+        started = time.perf_counter()
 
         sources: List[str] = []
 
@@ -229,12 +261,18 @@ class SecurityAgent(BaseAgent):
             "llm_reasoning":       llm_reasoning,
             "llm_conclusion":      llm_conclusion,
             "sources":             sources,
+            "cache_hit":           False,
+            "stage_timings": {
+                "total_s": round(time.perf_counter() - started, 4),
+            },
             "summary":             self._build_summary(
                 file_path, opt_all, new_vulns, overall_risk, status
             ),
         }
 
         self.context.set("security_findings", result)
+        if cache_enabled:
+            _SECURITY_CACHE.set(cache_key, deepcopy(result))
         logger.info(
             f"SecurityAgent: complete — status={status}, risk={overall_risk}, "
             f"total={len(opt_all)}, new={len(new_vulns)}"
@@ -283,6 +321,24 @@ class SecurityAgent(BaseAgent):
                         f"Always use a literal format string: "
                         f'{fn_name}("%s", {arg}).'
                     ),
+                    "confidence":     0.9,
+                    "source":         "rule",
+                })
+
+        # Hardcoded secrets / credentials
+        for pattern in (self._HARDCODED_SECRET_RE, self._HARDCODED_SECRET_DEFINE_RE):
+            for m in pattern.finditer(code):
+                ln_no = code[: m.start()].count("\n") + 1
+                findings.append({
+                    "type":           "hardcoded_secret",
+                    "severity":       "high",
+                    "line":           ln_no,
+                    "description":    (
+                        "Hardcoded credential/secret detected in source code. "
+                        "Secrets committed to source control are a critical security risk (CWE-798)."
+                    ),
+                    "cwe_id":         "CWE-798",
+                    "recommendation": 'Load from environment variable: getenv("SECRET_NAME").',
                     "confidence":     0.9,
                     "source":         "rule",
                 })
@@ -619,10 +675,21 @@ class SecurityAgent(BaseAgent):
     def _llm_scan(self, optimized_code: str, original_code: str,
                   baseline_types: List[str]
                   ) -> Tuple[List[Dict], List[str], str, float]:
+        _empty = ([], ["LLM unavailable — rule+heuristic analysis only."], "LLM analysis skipped.", 0.0)
+
+        if not self.llm.is_available():
+            logger.info("SecurityAgent: LLM not available — skipping Layer 3")
+            return _empty
+
         prompt = SecurityPromptTemplate.build(
             optimized_code, original_code, baseline_types
         )
         raw = self.llm.generate(prompt, system_prompt=SecurityPromptTemplate.SYSTEM)
+
+        if "offline stub" in raw.lower():
+            logger.warning("SecurityAgent: LLM returned stub — skipping Layer 3")
+            return _empty
+
         cot = self.cot_val.validate(raw)
         if cot.is_valid:
             for f in cot.findings:
@@ -650,7 +717,7 @@ class SecurityAgent(BaseAgent):
         try:
             suffix = ".cpp" if str(file_path).endswith(".cpp") else ".c"
             with tempfile.NamedTemporaryFile(
-                mode="w", suffix=suffix, delete=False, encoding="utf-8"
+                mode="w", suffix=suffix, delete=False, encoding="utf-8", dir=runtime_temp_dir()
             ) as tmp:
                 tmp.write(code)
                 tmp_path = tmp.name

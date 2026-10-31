@@ -1,6 +1,6 @@
 # Multi-Agent Framework
 
-A flexible, thread-safe multi-agent communication framework for the AI-Driven Compiler Optimization System.
+A flexible, thread-safe multi-agent communication framework for the DeepCompile.
 
 ## Features
 
@@ -215,4 +215,4 @@ The agents communicate via messages and share results through the context manage
 
 ## License
 
-Part of the AI-Driven Compiler Optimization System project.
+Part of the DeepCompile project.

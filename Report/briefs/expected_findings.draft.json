@@ -1,0 +1,152 @@
+{
+  "TC01": [
+    "uninitialized_variable"
+  ],
+  "TC02": [
+    "uninitialized_variable"
+  ],
+  "TC03": [
+    "uninitialized_variable"
+  ],
+  "TC04": [
+    "uninitialized_variable"
+  ],
+  "TC05": [
+    "uninitialized_variable"
+  ],
+  "TC06": [
+    "division_by_zero_risk"
+  ],
+  "TC07": [
+    "division_by_zero_risk"
+  ],
+  "TC08": [
+    "division_by_zero_risk"
+  ],
+  "TC09": [
+    "potential_buffer_overflow"
+  ],
+  "TC10": [
+    "signed_index"
+  ],
+  "TC11": [
+    "off_by_one_error",
+    "potential_buffer_overflow"
+  ],
+  "TC12": [
+    "unsafe_strcpy",
+    "stack_buf_overflow"
+  ],
+  "TC13": [
+    "unsafe_sprintf",
+    "stack_buf_overflow"
+  ],
+  "TC14": [
+    "memory_leak"
+  ],
+  "TC15": [
+    "double_free"
+  ],
+  "TC16": [
+    "use_after_free"
+  ],
+  "TC17": [],
+  "TC18": [],
+  "TC19": [
+    "unsafe_strcpy"
+  ],
+  "TC20": [
+    "memory_leak"
+  ],
+  "TC21": [
+    "use_after_free"
+  ],
+  "TC22": [],
+  "TC23": [],
+  "TC24": [],
+  "TC25": [
+    "use_after_free"
+  ],
+  "TC26": [],
+  "TC27": [],
+  "TC28": [],
+  "TC29": [
+    "signed_unsigned_mismatch"
+  ],
+  "TC30": [],
+  "TC31": [
+    "off_by_one_error",
+    "potential_buffer_overflow"
+  ],
+  "TC32": [],
+  "TC33": [],
+  "TC34": [],
+  "TC35": [
+    "dead_code_after_return"
+  ],
+  "TC36": [],
+  "TC37": [],
+  "TC38": [],
+  "TC39": [
+    "empty_if_body"
+  ],
+  "TC40": [],
+  "TC41": [
+    "memory_leak"
+  ],
+  "TC42": [
+    "memory_leak"
+  ],
+  "TC43": [
+    "memory_leak"
+  ],
+  "TC44": [],
+  "TC45": [],
+  "TC46": [],
+  "TC47": [],
+  "TC48": [
+    "format_string_bug"
+  ],
+  "TC49": [
+    "command_injection"
+  ],
+  "TC50": [
+    "integer_overflow_malloc"
+  ],
+  "TC51": [
+    "toctou_race"
+  ],
+  "TC52": [
+    "hardcoded_secret"
+  ],
+  "TC53": [
+    "race_condition_risk"
+  ],
+  "TC54": [],
+  "TC55": [],
+  "TC56": [
+    "uninitialized_variable",
+    "potential_buffer_overflow",
+    "off_by_one_error",
+    "algorithmic_inefficiency",
+    "memory_leak",
+    "division_by_zero_risk",
+    "type_mismatch_int_string",
+    "loop_invariant_strlen",
+    "redundant_constant_in_loop",
+    "loop_invariant_sizeof",
+    "empty_if_body",
+    "empty_else_body",
+    "dead_code_after_return"
+  ],
+  "TC57": [
+    "uninitialized_variable",
+    "off_by_one_error",
+    "unsafe_strcpy",
+    "stack_buf_overflow"
+  ],
+  "TestCase1": [
+    "uninitialized_variable",
+    "division_by_zero_risk"
+  ]
+}

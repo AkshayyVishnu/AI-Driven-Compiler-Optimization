@@ -22,6 +22,7 @@ from src.agents.analysis_agent import AnalysisAgent
 from src.agents.optimization_agent import OptimizationAgent
 from src.agents.verification_agent import VerificationAgent
 from src.agents.security_agent import SecurityAgent
+from src.temp_paths import runtime_temp_dir
 
 logger = logging.getLogger(__name__)
 
@@ -429,7 +430,7 @@ class CompilerOptimizationPipeline:
         """Run the pipeline on a code string (for testing)."""
         import tempfile, os
         with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".cpp", delete=False, encoding="utf-8"
+            mode="w", suffix=".cpp", delete=False, encoding="utf-8", dir=runtime_temp_dir()
         ) as tmp:
             tmp.write(source_code)
             tmp_path = tmp.name
@@ -442,3 +443,25 @@ class CompilerOptimizationPipeline:
                 os.unlink(tmp_path)
             except OSError:
                 pass
+
+    def run_orchestrated(
+        self,
+        file_path: str,
+        *,
+        max_cycles: int = 3,
+        low_conf_threshold: float = 0.8,
+    ) -> Dict[str, Any]:
+        """Run the bounded orchestration workflow on a source file."""
+        from src.agents.orchestrator_agent import OrchestratorAgent
+
+        orchestrator = OrchestratorAgent(
+            "orchestrator_1",
+            ContextManager(),
+            self.llm,
+            self._msg_logger,
+        )
+        return orchestrator.process({
+            "file_path": file_path,
+            "max_cycles": max_cycles,
+            "low_conf_threshold": low_conf_threshold,
+        })

@@ -1,0 +1,15 @@
+{
+  "tc": "TC21",
+  "config": "gpp_wall",
+  "expected": [
+    "use_after_free"
+  ],
+  "headline": true,
+  "supported": true,
+  "nondeterministic": true,
+  "detected": {
+    "use_after_free": false
+  },
+  "n_findings": 0,
+  "ver_status": "n/a"
+}

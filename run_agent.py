@@ -518,7 +518,7 @@ def main():
     setup_logging(level=level)
 
     print()
-    _banner(f"AI COMPILER OPTIMIZATION — {args.command.upper()} AGENT")
+    _banner(f"DEEPCOMPILE — {args.command.upper()} AGENT")
     print()
 
     dispatch = {

@@ -1,0 +1,15 @@
+{
+  "tc": "TC35",
+  "config": "gpp_wall",
+  "expected": [
+    "dead_code"
+  ],
+  "headline": true,
+  "supported": true,
+  "nondeterministic": false,
+  "detected": {
+    "dead_code": false
+  },
+  "n_findings": 0,
+  "ver_status": "n/a"
+}

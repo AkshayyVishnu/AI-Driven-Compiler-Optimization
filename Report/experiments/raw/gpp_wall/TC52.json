@@ -1,0 +1,15 @@
+{
+  "tc": "TC52",
+  "config": "gpp_wall",
+  "expected": [
+    "hardcoded_secret"
+  ],
+  "headline": true,
+  "supported": true,
+  "nondeterministic": false,
+  "detected": {
+    "hardcoded_secret": false
+  },
+  "n_findings": 0,
+  "ver_status": "n/a"
+}

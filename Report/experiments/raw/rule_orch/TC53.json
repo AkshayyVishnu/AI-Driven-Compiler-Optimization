@@ -1,0 +1,49 @@
+{
+  "tc": "TC53",
+  "config": "rule_orch",
+  "expected": [
+    "data_race"
+  ],
+  "headline": true,
+  "supported": true,
+  "nondeterministic": true,
+  "detected": {
+    "data_race": false
+  },
+  "n_findings": 0,
+  "detect_s": 0.019,
+  "workflow_status": "PASS",
+  "iterations": 0,
+  "stop_reason": "initial_pass",
+  "pipeline_status": "success",
+  "pipeline_s": 0.751,
+  "ver_status": "PASS",
+  "sec_status": "PASS",
+  "diff_passed": false,
+  "transformations": [
+    "prefer_preincrement"
+  ],
+  "stage_timings": {
+    "analysis": {
+      "parse_s": 0.0005,
+      "rule_s": 0.0018,
+      "llm_s": 0.0
+    },
+    "optimization": {
+      "rule_s": 0.0007,
+      "llm_s": 0.0
+    },
+    "verification": {
+      "parallel_checks_s": 0.6357,
+      "llm_s": 0.0
+    },
+    "security": {
+      "total_s": 0.001
+    }
+  },
+  "llm_fallback": false,
+  "code_changed": true,
+  "corrected_detector": null,
+  "output_matches_sol": null,
+  "fp_on_sol": false
+}

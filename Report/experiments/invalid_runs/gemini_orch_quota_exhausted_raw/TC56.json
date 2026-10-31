@@ -1,0 +1,71 @@
+{
+  "tc": "TC56",
+  "config": "gemini_orch",
+  "expected": [
+    "uninitialized",
+    "buffer_overflow",
+    "leak",
+    "div_by_zero",
+    "type_conversion",
+    "dead_code",
+    "logic_error",
+    "performance"
+  ],
+  "headline": false,
+  "supported": true,
+  "nondeterministic": true,
+  "detected": {
+    "uninitialized": true,
+    "buffer_overflow": true,
+    "leak": true,
+    "div_by_zero": true,
+    "type_conversion": true,
+    "dead_code": true,
+    "logic_error": true,
+    "performance": true
+  },
+  "n_findings": 27,
+  "detect_s": 1.292,
+  "workflow_status": "PASS",
+  "iterations": 0,
+  "stop_reason": "initial_pass",
+  "pipeline_status": "success",
+  "pipeline_s": 3.476,
+  "ver_status": "PASS",
+  "sec_status": "PASS",
+  "diff_passed": false,
+  "transformations": [
+    "initialize_variable",
+    "fix_type_mismatch",
+    "hoist_loop_invariant",
+    "hoist_loop_invariant",
+    "hoist_loop_invariant",
+    "remove_empty_if",
+    "remove_empty_else",
+    "remove_dead_code",
+    "fix_memory_leak",
+    "prefer_preincrement"
+  ],
+  "stage_timings": {
+    "analysis": {
+      "parse_s": 0.003,
+      "rule_s": 0.0036,
+      "llm_s": 0.8528
+    },
+    "optimization": {
+      "rule_s": 0.0026,
+      "llm_s": 0.3318
+    },
+    "verification": {
+      "parallel_checks_s": 2.3233,
+      "llm_s": 0.3325
+    },
+    "security": {
+      "total_s": 0.3969
+    }
+  },
+  "llm_fallback": true,
+  "code_changed": true,
+  "corrected_detector": false,
+  "output_matches_sol": null
+}
